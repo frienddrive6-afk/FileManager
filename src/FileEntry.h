@@ -60,6 +60,9 @@ public:
     /// @brief установить статус выделения файла выделенным или нет
     /// @param value true если файл должен быть выделен иначе false
     void SetSelected(bool value);
+
+    /// @return время последнего изменения файла
+    filesystem::file_time_type GetLastWriteTime() const;
     
 
 

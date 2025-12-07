@@ -47,6 +47,9 @@ public:
     /// @param newPath путь к новому месту назначения
     static void Move(const filesystem::path& soursPath,const filesystem::path& newPath);
 
+    /// @brief создает пустой текстовый файл (.txt) в указанной директории с указанным именем
+    /// @param path путь к директории где будет создан файл
+    /// @param name имя создаваемого текстового файла
     static void CreateEmtyTXTFile(const filesystem::path& path,const string& name);
 
 };

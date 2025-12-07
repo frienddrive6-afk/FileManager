@@ -96,3 +96,9 @@ void FileEntry::SetSelected(bool value)
 {
     this->isSelected = value;
 }
+
+
+filesystem::file_time_type FileEntry::GetLastWriteTime() const
+{
+    return this->lastWriteTime;
+}
