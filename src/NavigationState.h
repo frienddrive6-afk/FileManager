@@ -62,8 +62,9 @@ public:
     filesystem::path GetCurrentPath() const;
 
     /// @return текущий режим буфера обмена (вырезание или копирование)
-    const vector<FileEntry>& NavigationState::GetCurrentFiles() const;
+    const vector<FileEntry>& GetCurrentFiles() const;
 
+    /// @brief сортирует текущие файлы в соответствии с текущим режимом сортировки
     void SortFiles();
 
 
