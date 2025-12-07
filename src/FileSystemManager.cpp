@@ -1,0 +1,228 @@
+#include <iostream>
+#include <filesystem>
+#include <fstream>
+// #include <cstdlib> // Для getenv 
+// #include <filesystemtream>
+// #include<string>
+// #include <cstring>
+// #include<cstdarg> //для безконечных аргументов функции
+#include <vector>
+#include <algorithm>
+// #include <unistd.h> //задежка
+// #include<cmath>
+// #include<math.h>
+// #include <iomanip>
+// #include <sstream>
+// #include <ncurses.h>
+// #include <chrono> 
+// #include <random>
+
+#include "main.h"
+#include "FileEntry.h"
+#include "FileSystemManager.h"
+
+using namespace std;
+
+
+vector<FileEntry> FileSystemManager::LoadDirectory(const filesystem::path& path)
+{
+    vector<FileEntry> files;
+
+    if (!filesystem::exists(path) || !filesystem::is_directory(path)) {
+        return files; 
+    }
+
+    try {
+        for (const auto& entry : filesystem::directory_iterator(path)) {
+            
+            
+            filesystem::path filePath = entry.path();
+            string fileName = filePath.filename().string();
+            
+            FileType type = FileType::Unknown;
+            if (entry.is_directory())
+            {
+                type = FileType::Directory;
+            }
+            else if (entry.is_regular_file()) 
+            {
+                type = FileType::RegularFile;
+            }
+            else if (entry.is_symlink())
+            {
+                type = FileType::Symlink;
+            }
+
+            uintmax_t size = 0;
+            if (type == FileType::RegularFile) {
+                error_code ec;
+                size = filesystem::file_size(entry, ec);
+                if (ec) 
+                {
+                    size = 0;
+                }
+            }
+
+            auto time = filesystem::last_write_time(entry);
+
+            files.emplace_back(filePath, fileName, size, type, time, false);
+        }
+    }
+    catch (const filesystem::filesystem_error& e) {
+        //тут лог
+    }
+
+    sort(files.begin(), files.end(), [](const FileEntry& a, const FileEntry& b) {
+        if (a.IsDirectory() != b.IsDirectory()) {
+            return a.IsDirectory() > b.IsDirectory(); 
+        }
+        return a.GetName() < b.GetName();
+    });
+
+    return files;
+}
+
+
+filesystem::path FileSystemManager::GetParentPath(const filesystem::path& path)
+{
+    return path.parent_path();
+}
+
+
+bool FileSystemManager::CheckAccess(const filesystem::path& path)
+{
+    std::error_code ec;
+    filesystem::directory_iterator it(path, ec); 
+
+    if (!ec) {
+        return true;
+    } else {
+        #ifdef LOG_ENABLED
+        std::cerr << "Ошибка доступа к директории \"" << path << "\": " << ec.message() << std::endl;
+        #endif
+        return false;
+    }
+
+}
+
+
+
+void FileSystemManager::CreateDirectory(const filesystem::path& path,const string& name)
+{
+    filesystem::path newDirPath = path / name;
+    error_code ec;
+    filesystem::create_directory(newDirPath,ec);
+
+    #ifdef LOG_ENABLED
+    if(ec) 
+    {
+        cerr<<"Ошибка создания директории: "<<ec.message()<<endl;
+    }else{
+        cout<<"Директория успешно создана: "<<newDirPath<<endl;
+    }
+    #endif
+}
+
+
+void FileSystemManager::DeletePath(const filesystem::path& path)
+{
+    error_code ec;
+
+    if (!filesystem::exists(path, ec)) {
+        return;
+    }
+
+    if (filesystem::is_directory(path, ec)) {
+        for(const auto& entry : filesystem::directory_iterator(path)) {
+            DeletePath(entry.path());
+        }
+    }
+
+    filesystem::remove(path, ec);
+
+    #ifdef LOG_ENABLED
+    if(ec) {
+        cerr << "Ошибка удаления: " << path << " -> " << ec.message() << endl;
+    }else{
+        cout << "Удалено успешно: " << path << endl;
+    }
+    #endif
+}
+
+
+void FileSystemManager::Rename(const filesystem::path& oldPath,const string& name)
+{
+    filesystem::path newPath = oldPath.parent_path() / name;
+    error_code ec;
+    filesystem::rename(oldPath, newPath, ec);
+
+    #ifdef LOG_ENABLED
+    if(ec) {
+        cerr << "Ошибка переименования: " << ec.message() << endl;
+    }else{
+        cout << "Переименовано успешно: " << newPath << endl;
+    }
+    #endif
+
+}
+
+
+
+void FileSystemManager::Copy(const filesystem::path& soursePath,const filesystem::path& newPath)
+{
+    if(!filesystem::exists(soursePath))
+    {
+        #ifdef LOG_ENABLED
+        cerr<<"Ошибка копирования: исходный путь не существует "<<soursePath<<endl;
+        #endif
+        return;
+    }
+
+    error_code ec;
+    filesystem::copy(soursePath,newPath,filesystem::copy_options::recursive | filesystem::copy_options::overwrite_existing,ec);
+
+
+    #ifdef LOG_ENABLED
+    if(ec) {
+        cerr << "Ошибка копирования: " << ec.message() << endl;
+    }else{
+        cout << "Скопировано успешно: " << newPath << endl; 
+    }
+    #endif
+}
+
+
+void FileSystemManager::Move(const filesystem::path& soursPath,const filesystem::path& newPath)
+{
+    error_code ec;
+    filesystem::rename(soursPath,newPath,ec);
+
+    #ifdef LOG_ENABLED
+    if(ec) {
+        cerr << "Ошибка перемещения: " << ec.message() << endl;
+    }else{
+        cout << "Перемещено успешно: " << newPath << endl; 
+    }
+    #endif
+}
+
+
+void FileSystemManager::CreateEmtyTXTFile(const filesystem::path& path,const string& name)
+{
+    filesystem::path filePath = path / name;
+    ofstream file(filePath);
+    if(!file.is_open())
+    {
+        #ifdef LOG_ENABLED
+        cerr<<"Ошибка создания файла: "<<filePath<<endl;
+        #endif
+        return;
+    }else{
+        file.close();
+        #ifdef LOG_ENABLED
+        cout<<"Файл успешно создан: "<<filePath<<endl;
+        #endif
+    }
+
+
+}

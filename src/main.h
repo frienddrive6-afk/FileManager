@@ -1,5 +1,7 @@
 #pragma once
 
+#define LOG_ENABLED
+
 enum FileType
 {
     Directory,

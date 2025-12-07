@@ -12,4 +12,5 @@ include_directories(src)
 add_executable(FileManager 
     src/main.cpp 
     src/FileEntry.cpp
+    src/FileSystemManager.cpp
 )
