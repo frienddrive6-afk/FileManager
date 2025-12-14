@@ -4,7 +4,7 @@
 #include <string>
 
 
-#include "main.h"
+#include "Types.h"
 
 using namespace std;
 

@@ -1,5 +1,7 @@
 #include "NavigationState.h"
 #include "FileEntry.h"
+#include "main.h"
+#include "Types.h"
 
 #include <iostream>
 #include <vector>
@@ -21,7 +23,7 @@ NavigationState::NavigationState() :
 
 }
 
-NavigationState::NavigationState(const filesystem::path& path,ClipboardMode clipboardMode = ClipboardMode::None,FileComparator sortAlgo = CompareByNameAsc) :
+NavigationState::NavigationState(const filesystem::path& path, ClipboardMode clipboardMode, FileComparator sortAlgo) :
         currentPath{path},
         clipboardMode{clipboardMode},
         currentSortAlgo{sortAlgo}
