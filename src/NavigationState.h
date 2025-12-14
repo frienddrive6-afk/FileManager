@@ -9,22 +9,27 @@
 
 using namespace std;
 
-
+/// @brief класс представляющий состояние навигации в файловой системе
+/// - @param currentPath: текущий путь навигации (std::filesystem::path)
+/// - @param currentFiles: текущий список файлов (vector<FileEntry>)
+/// - @param clipboard: буфер обмена (vector<filesystem::path>)
+/// - @param clipboardMode: текущий режим буфера обмена (None, Copy, Cut)
+///- @param currentSort: текущий режим сортировки
 class NavigationState
 {
 private:
     filesystem::path currentPath;
     vector<FileEntry> currentFiles;
     vector<filesystem::path> clipboard;
-    bool isCutMode;
-    SortMode currentSort;
+    ClipboardMode clipboardMode;                            
+    FileComparator currentSortAlgo;
 
 public:
     //конструктор без параметров устанавливает текущий путь в домашнюю директорию пользователя
     NavigationState();
 
     //конструктор с параметрами
-    NavigationState(const filesystem::path& path,bool cutMode = false,SortMode sortMode = SortMode::ByNameAsc);
+    NavigationState(const filesystem::path& path,ClipboardMode clipboardMode = ClipboardMode::None,FileComparator sortAlgo = CompareByNameAsc);
 
     /// @brief устанавливает текущий путь навигации
     /// @param path новый текущий путь
@@ -54,9 +59,20 @@ public:
 
     /// @brief Выбирает режим вырезания или копирования для буфера обмена
     /// @param cutMode true для режима вырезания, false для режима копирования
-    void SetCutMode(const bool cutMode);
 
-    void SetSortMode(SortMode mode);
+    /// @brief устанавливает режим буфера обмена
+    void SetClipboardMode(ClipboardMode mode);
+
+    /// @return текущий режим буфера обмена
+    ClipboardMode GetClipboardMode() const;
+
+    /// @brief очищает буфер обмена
+    void ClearClipboard();
+
+    /// @return буфер обмена
+    const vector<filesystem::path>& GetClipboard() const;
+
+    void SetSortAlgo(FileComparator algo);
 
     /// @return текущий путь навигации
     filesystem::path GetCurrentPath() const;

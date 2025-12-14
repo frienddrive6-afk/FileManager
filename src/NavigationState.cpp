@@ -10,8 +10,8 @@
 
 
 NavigationState::NavigationState() :
-    isCutMode{false},
-    currentSort{SortMode::ByNameAsc}
+    clipboardMode{ClipboardMode::None},
+    currentSortAlgo{CompareByNameAsc}
 {
     if(std::getenv("HOME") == nullptr) {
         this->currentPath = filesystem::current_path();
@@ -21,10 +21,10 @@ NavigationState::NavigationState() :
 
 }
 
-NavigationState::NavigationState(const filesystem::path& path,bool cutMode,SortMode sortMode) :
+NavigationState::NavigationState(const filesystem::path& path,ClipboardMode clipboardMode = ClipboardMode::None,FileComparator sortAlgo = CompareByNameAsc) :
         currentPath{path},
-        isCutMode{cutMode},
-        currentSort{sortMode}
+        clipboardMode{clipboardMode},
+        currentSortAlgo{sortAlgo}
 {}
 
 
@@ -36,6 +36,13 @@ void NavigationState::SetPath(const filesystem::path& path)
 void NavigationState::Refresh(const vector<FileEntry>& files)
 {
     this->currentFiles = files;
+    SortFiles();
+}
+
+
+void NavigationState::SetSortAlgo(FileComparator algo)
+{
+    this->currentSortAlgo = algo;
     SortFiles();
 }
 
@@ -83,16 +90,32 @@ void NavigationState::AddToClipboard(const vector<filesystem::path>& arrPath)
 }
 
 
-void NavigationState::SetCutMode(const bool cutMode)
+
+void NavigationState::SetClipboardMode(ClipboardMode mode)
 {
-    this->isCutMode = cutMode;
+    this->clipboardMode = mode;
 }
 
-void NavigationState::SetSortMode(SortMode mode)
+ClipboardMode NavigationState::GetClipboardMode() const
 {
-    this->currentSort = mode;
-    SortFiles();
+    return this->clipboardMode;
 }
+
+
+
+
+void NavigationState::ClearClipboard()
+{
+    this->clipboard.clear();
+    this->clipboardMode = ClipboardMode::None;
+}
+
+
+const vector<filesystem::path>& NavigationState::GetClipboard() const
+{
+    return this->clipboard;
+}
+
 
 
 filesystem::path NavigationState::GetCurrentPath() const
@@ -109,25 +132,15 @@ const vector<FileEntry>& NavigationState::GetCurrentFiles() const
 
 void NavigationState::SortFiles()
 {
-    std::sort(currentFiles.begin(), currentFiles.end(), [this](const FileEntry& a, const FileEntry& b) {
-        
+    if (currentSortAlgo == nullptr) return;
+
+    std::sort(currentFiles.begin(), currentFiles.end(), 
+        [this](const FileEntry& a, const FileEntry& b) -> bool 
+    {
         if (a.IsDirectory() != b.IsDirectory()) {
             return a.IsDirectory() > b.IsDirectory(); 
         }
 
-        switch (currentSort) {
-            case SortMode::ByNameDesc: // Я-А
-                return a.GetName() > b.GetName();
-            
-            case SortMode::BySize: 
-                return a.GetSize() < b.GetSize();
-                
-            case SortMode::ByDate:
-               return a.GetLastWriteTime() > b.GetLastWriteTime();
-
-            case SortMode::ByNameAsc:  // Имя А-Я
-            default:
-                return a.GetName() < b.GetName();
-        }
+        return this->currentSortAlgo(a, b);
     });
 }
