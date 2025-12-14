@@ -72,6 +72,7 @@ public:
     /// @return буфер обмена
     const vector<filesystem::path>& GetClipboard() const;
 
+    /// @brief устанавливает текущий режим сортировки
     void SetSortAlgo(FileComparator algo);
 
     /// @return текущий путь навигации
