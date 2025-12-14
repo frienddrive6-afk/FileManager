@@ -2,6 +2,7 @@
 #include "FileEntry.h"
 #include "main.h"
 #include "Types.h"
+#include "FileSystemManager.h"
 
 #include <iostream>
 #include <vector>
@@ -33,6 +34,14 @@ NavigationState::NavigationState(const filesystem::path& path, ClipboardMode cli
 void NavigationState::SetPath(const filesystem::path& path)
 {
     this->currentPath = path;
+}
+
+void NavigationState::SetCurrentFiles(const vector<FileEntry>& files)
+{
+    this->currentFiles.clear();
+    this->currentFiles = files;
+    SortFiles();
+
 }
 
 void NavigationState::Refresh(const vector<FileEntry>& files)

@@ -34,6 +34,9 @@ public:
     /// @brief устанавливает текущий путь навигации
     /// @param path новый текущий путь
     void SetPath(const filesystem::path& path);
+   
+    /// @brief устанавливает текущий список файлов в навигации
+    void SetCurrentFiles(const vector<FileEntry>& files);
 
     /// @brief обновляет список текущих файлов в навигации
     /// @param files новый список файлов типа FileEntry
@@ -78,7 +81,7 @@ public:
     /// @return текущий путь навигации
     filesystem::path GetCurrentPath() const;
 
-    /// @return текущий режим буфера обмена (вырезание или копирование)
+    /// @return список текущих файлов
     const vector<FileEntry>& GetCurrentFiles() const;
 
     /// @brief сортирует текущие файлы в соответствии с текущим режимом сортировки

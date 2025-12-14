@@ -1,6 +1,7 @@
 #pragma once
 
 #define LOG_ENABLED
+#define LOG_APP_CORE
 
 #include "FileEntry.h"
 
