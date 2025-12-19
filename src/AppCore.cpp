@@ -1,12 +1,25 @@
 
 #include "AppCore.h"
+#include "ConsoleRender.h"
+
 #include <cstdlib>
 #include <filesystem>
 #include <string>
 
+using namespace std;
+
 
 AppCore::AppCore() 
-{}
+{
+    this->render = new ConsoleRender();
+}
+
+AppCore::~AppCore() 
+{
+    if (this->render != nullptr) {
+        delete this->render;
+    }
+}
 
 void AppCore::Init()
 {
@@ -87,8 +100,23 @@ void AppCore::OnDeleteRequest()
 
 void AppCore::OnCopyRequest()
 {
-    state.SetClipboardMode(ClipboardMode::Copy);
     state.ClearClipboard(); 
+    state.SetClipboardMode(ClipboardMode::Copy);
+
+    filesystem::path path = state.GetCurrentPath();
+    for(const FileEntry& entry : state.GetCurrentFiles())
+    {
+        if(entry.IsSelected())
+        {
+            state.AddToClipboard(entry.GetPath()); 
+        }
+    }
+}
+
+void AppCore::OnCutRequest()
+{
+    state.ClearClipboard(); 
+    state.SetClipboardMode(ClipboardMode::Cut);
 
     filesystem::path path = state.GetCurrentPath();
     for(const FileEntry& entry : state.GetCurrentFiles())
@@ -119,7 +147,6 @@ void AppCore::OnPasteRequest()
     {
         for(const filesystem::path& srcPath : state.GetClipboard())
         {
-            // Формируем куда копировать: ТекущаяПапка / ИмяФайла
             filesystem::path destPath = curr_path / srcPath.filename();
 
             if(state.GetClipboardMode() == ClipboardMode::Copy)
@@ -144,14 +171,76 @@ void AppCore::OnPasteRequest()
 
 void AppCore::Run()
 {
-    Init();
+    Init(); 
 
     while (true)
     {
+        render->Draw(state);
 
-        
+        string input = render->ReadInput();
 
+        if (input == "exit") 
+        {
+            break; 
+        }
+        else if (input == "..") 
+        {
+            GoUp();
+        }
+        else if (input == "cp") 
+        {
+            OnCopyRequest();
+            render->ShowMessage("Файлы скопированы в буфер!");
+        }
+        else if (input == "cut") 
+        {
+            OnCutRequest();
+            render->ShowMessage("Файлы вырезаны в буфер!");
+        }
+        else if (input == "pst") 
+        {
+            OnPasteRequest();
+        }
+        else if (input == "del") 
+        {
+            OnDeleteRequest();
+        }else if(input == "cls" || input == "clearBuffer") 
+        {
+            state.ClearSelection(); 
 
+            state.ClearClipboard();
+            
+            render->ShowMessage("Буфер очищен."); 
+        }else if (input[0] == '+') 
+        {
+            try {
+                int idx = stoi(input.substr(1));
+                state.ToggleSelection(idx);
+            } catch (...) {
+                render->ShowMessage("Неверный формат числа!");
+            }
+        }
+        else 
+        {
+            try {
+                int idx = stoi(input);
 
+                if(this->state.GetCurrentFiles().size() > idx && idx >= 0)
+                {
+                    if(this->state.GetCurrentFiles()[idx].IsDirectory())
+                    {
+                        EnterDirectory(idx);
+                    }else
+                    {
+                        ExecuteFile(idx);
+                    }
+                    
+                }
+
+                
+            } catch (...) {
+                render->ShowMessage("Неизвестная команда!");
+            }
+        }
     }
 }

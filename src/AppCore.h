@@ -2,17 +2,22 @@
 
 #include "NavigationState.h"
 #include "FileSystemManager.h"
+#include "IRenderer.h"
 
 
-
+/// @brief класс основной логики программы
+///@param state состояние навигации в файловой системе
+///@param render интерфейс рендеринга
 class AppCore
 {
 private:
     NavigationState state;
-    // IRenderer* render;                    //будет реализовано позже
+    IRenderer* render;
 
 public:
     AppCore();
+
+    
 
 
     void Init();
@@ -37,11 +42,15 @@ public:
     /// @brief копирует выделеный файл или группу файлов в буфер обмена
     void OnCopyRequest();
 
+    void OnCutRequest();
+
     /// @brief вставляет выделеный файл или группу файлов из буфера обмена
     void OnPasteRequest();
 
 
-
+    /// @brief запускает основной цикл программы в котором происходит рендеринг интерфейса и взаимодействие с пользователем
     void Run();
+
+    ~AppCore();
 
 };

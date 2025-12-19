@@ -15,4 +15,5 @@ add_executable(FileManager
     src/FileSystemManager.cpp
     src/NavigationState.cpp
     src/AppCore.cpp
+    src/ConsoleRender.cpp
 )

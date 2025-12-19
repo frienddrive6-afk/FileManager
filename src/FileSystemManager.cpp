@@ -28,59 +28,66 @@ vector<FileEntry> FileSystemManager::LoadDirectory(const filesystem::path& path)
 {
     vector<FileEntry> files;
 
-    if (!filesystem::exists(path) || !filesystem::is_directory(path)) {
+    error_code ec;
+    if (!filesystem::exists(path, ec) || !filesystem::is_directory(path, ec)) {
         return files; 
     }
 
-    try {
-        for (const auto& entry : filesystem::directory_iterator(path)) {
-            
-            
+
+    auto iterator = filesystem::directory_iterator(
+        path, 
+        filesystem::directory_options::skip_permission_denied, 
+        ec
+    );
+
+
+    if (ec) {
+        return files; 
+    }
+
+
+    for (const auto& entry : iterator) {
+        try {
             filesystem::path filePath = entry.path();
             string fileName = filePath.filename().string();
             
             FileType type = FileType::Unknown;
-            if (entry.is_directory())
-            {
-                type = FileType::Directory;
-            }
-            else if (entry.is_regular_file()) 
-            {
-                type = FileType::RegularFile;
-            }
-            else if (entry.is_symlink())
-            {
-                type = FileType::Symlink;
-            }
+            if (entry.is_directory()) type = FileType::Directory;
+            else if (entry.is_regular_file()) type = FileType::RegularFile;
+            else if (entry.is_symlink()) type = FileType::Symlink;
 
             uintmax_t size = 0;
             if (type == FileType::RegularFile) {
-                error_code ec;
-                size = filesystem::file_size(entry, ec);
-                if (ec) 
-                {
-                    size = 0;
-                }
+                error_code size_ec;
+                size = filesystem::file_size(entry, size_ec);
+                if (size_ec) size = 0;
             }
 
-            auto time = filesystem::last_write_time(entry);
+            error_code time_ec;
+            auto time = filesystem::last_write_time(entry, time_ec);
+            if (time_ec) time = filesystem::file_time_type::min();
 
             files.emplace_back(filePath, fileName, size, type, time, false);
         }
-    }
-    catch (const filesystem::filesystem_error& e) {
-        //тут лог
+        catch (...) {
+
+            continue; 
+        }
     }
 
     sort(files.begin(), files.end(), [](const FileEntry& a, const FileEntry& b) {
         if (a.IsDirectory() != b.IsDirectory()) {
             return a.IsDirectory() > b.IsDirectory(); 
         }
+
         return a.GetName() < b.GetName();
     });
 
     return files;
 }
+
+
+
 
 
 filesystem::path FileSystemManager::GetParentPath(const filesystem::path& path)

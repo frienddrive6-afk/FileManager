@@ -19,12 +19,15 @@
 #include "main.h"
 #include "FileEntry.h"
 #include "FileSystemManager.h"
+#include "NavigationState.h"
+#include "AppCore.h"
+#include "IRenderer.h"
 
 using namespace std;
 
 
 
-
+//главная функция программы
 int main()
 {   
     #ifdef LOG_ENABLED
@@ -77,6 +80,10 @@ int main()
 
     cout << "Hello, FileManager!" << endl;
     #endif
+
+    AppCore app;
+
+    app.Run();
 
     return 0;
 }

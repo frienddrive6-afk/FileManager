@@ -13,18 +13,18 @@ using namespace std;
 /// - @param path: Полный путь к файлу (std::filesystem::path)
 /// - @param name: Имя файла для отображения (string)
 /// - @param size: Размер в байтах (uintmax_t)
-/// - @param type: Тип файла FileType
+/// - @param type: Тип файла (Directory, RegularFile, Symlink, Unknown)
 /// - @param lastWriteTime: Время последнего изменения
 /// - @param isSelected: Флаг, выделен ли файл в интерфейсе
 class FileEntry
 {
 private:
-    filesystem::path path;                                  // Полный путь к файлу
-    string name;                                            // Имя файла для отображения                                   
-    uintmax_t size;                                         // Размер файла в байтах
-    FileType type;                                          // Тип файла (Directory, RegularFile, Symlink, Unknown)
-    filesystem::file_time_type lastWriteTime;               // Время последнего изменения файла
-    bool isSelected;                                        // Выбран ли файл в интерфейсе   
+    filesystem::path path;                                  
+    string name;                                                                               
+    uintmax_t size;                                         
+    FileType type;                                          
+    filesystem::file_time_type lastWriteTime;               
+    bool isSelected;                                          
 
 public:
 

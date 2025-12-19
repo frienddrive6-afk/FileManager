@@ -7,10 +7,10 @@
 
 
 
-//для NavigationState
+//переменная какая хранит функцию сортировки
 using FileComparator = bool(*)(const FileEntry&, const FileEntry&);
 
-inline bool CompareByNameAsc(const FileEntry& a, const FileEntry& b) {
+inline bool CompareByNameAsc(const FileEntry& a, const FileEntry& b) {                         //inline нужна для того что бы компилятор не нугался на дубликаты и так же намикает компилятору что бы заменил вызов функции заменить на ее реализацией
     return a.GetName() < b.GetName();
 }
 
