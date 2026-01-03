@@ -11,14 +11,12 @@ using namespace std;
 
 AppCore::AppCore() 
 {
-    this->render = new ConsoleRender();
+
 }
 
 AppCore::~AppCore() 
 {
-    if (this->render != nullptr) {
-        delete this->render;
-    }
+
 }
 
 void AppCore::Init()
@@ -35,6 +33,10 @@ void AppCore::Navigate(const filesystem::path& path)
 {
     state.SetPath(path);
     state.Refresh(FileSystemManager::LoadDirectory(path));
+
+    if (OnStateChanged) {
+        OnStateChanged(state);
+    }
 }
 
 
@@ -111,6 +113,10 @@ void AppCore::OnCopyRequest()
             state.AddToClipboard(entry.GetPath()); 
         }
     }
+
+    if (OnStateChanged) {
+        OnStateChanged(state);
+    }
 }
 
 void AppCore::OnCutRequest()
@@ -125,6 +131,10 @@ void AppCore::OnCutRequest()
         {
             state.AddToClipboard(entry.GetPath()); 
         }
+    }
+
+    if (OnStateChanged) {
+        OnStateChanged(state);
     }
 }
 
@@ -169,15 +179,15 @@ void AppCore::OnPasteRequest()
 
 
 
-void AppCore::Run()
+void AppCore::Run(IRenderer& io)
 {
     Init(); 
 
     while (true)
     {
-        render->Draw(state);
+        // render->Draw(state);
 
-        string input = render->ReadInput();
+        string input = io.ReadInput();
 
         if (input == "exit") 
         {
@@ -190,12 +200,12 @@ void AppCore::Run()
         else if (input == "cp") 
         {
             OnCopyRequest();
-            render->ShowMessage("Файлы скопированы в буфер!");
+            io.ShowMessage("Файлы скопированы в буфер!");
         }
         else if (input == "cut") 
         {
             OnCutRequest();
-            render->ShowMessage("Файлы вырезаны в буфер!");
+            io.ShowMessage("Файлы вырезаны в буфер!");
         }
         else if (input == "pst") 
         {
@@ -210,14 +220,14 @@ void AppCore::Run()
 
             state.ClearClipboard();
             
-            render->ShowMessage("Буфер очищен."); 
+            io.ShowMessage("Буфер очищен."); 
         }else if (input[0] == '+') 
         {
             try {
                 int idx = stoi(input.substr(1));
                 state.ToggleSelection(idx);
             } catch (...) {
-                render->ShowMessage("Неверный формат числа!");
+                io.ShowMessage("Неверный формат числа!");
             }
         }
         else 
@@ -239,7 +249,7 @@ void AppCore::Run()
 
                 
             } catch (...) {
-                render->ShowMessage("Неизвестная команда!");
+                io.ShowMessage("Неизвестная команда!");
             }
         }
     }

@@ -22,6 +22,7 @@
 #include "NavigationState.h"
 #include "AppCore.h"
 #include "IRenderer.h"
+#include "ConsoleRender.h"
 
 //Qt
 #include <QApplication>
@@ -31,19 +32,43 @@ using namespace std;
 
 
 
+
+void consoleMode()
+{
+
+    AppCore core;
+    ConsoleRender console;
+
+    core.OnStateChanged = [&](const NavigationState& state) {
+        console.Draw(state); 
+    };
+
+    core.Run(console);
+
+}
+
 //главная функция программы
 int main(int argc, char *argv[])
 {   
+    //Вход в консольный режим без Qt
+    if (argc > 1 && string(argv[1]) == "-console") {
+        consoleMode(); 
+        return 0;
+    }
 
     QApplication app(argc, argv);
 
-    MainWindow window;
+    AppCore core;
+
+    MainWindow window(core); 
     window.show();
 
+    core.OnStateChanged = [&](const NavigationState& state)
+    {
+        window.updateView(state);
+    };
 
-    // AppCore app;
-
-    // app.Run();
+    core.Init(); 
 
     return app.exec();
 }

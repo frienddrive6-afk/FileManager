@@ -1,5 +1,8 @@
 #pragma once
 
+#include "AppCore.h"
+#include "NavigationState.h"
+
 #include <QMainWindow>
 
 
@@ -31,9 +34,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget* parent = nullptr);
+    explicit MainWindow(AppCore& core,QWidget* parent = nullptr);
 
+    void updateView(const NavigationState& state);
 private:
+    AppCore& m_core;
+
     QWidget* m_centralWidget;            
     QVBoxLayout* m_mainLayout;
     QSplitter* m_splitter;
@@ -49,6 +55,11 @@ private:
 
 
     void setUI();
+
+    private slots:
+        void onBackClicked();
+        void onAddressReturnPressed();
+        void onFileDoubleClicked(const QModelIndex& index); 
 
 
 };

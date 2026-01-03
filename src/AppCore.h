@@ -3,6 +3,7 @@
 #include "NavigationState.h"
 #include "FileSystemManager.h"
 #include "IRenderer.h"
+#include <functional>
 
 
 /// @brief класс основной логики программы
@@ -12,12 +13,20 @@ class AppCore
 {
 private:
     NavigationState state;
-    IRenderer* render;
+    // IRenderer* render;
+    
 
 public:
+    std::function<void(const NavigationState&)> OnStateChanged;
+
+
     AppCore();
 
-    
+    const NavigationState& GetState() const 
+    { 
+        return state; 
+    }
+
 
 
     void Init();
@@ -49,7 +58,7 @@ public:
 
 
     /// @brief запускает основной цикл программы в котором происходит рендеринг интерфейса и взаимодействие с пользователем
-    void Run();
+   void Run(IRenderer& io);
 
     ~AppCore();
 

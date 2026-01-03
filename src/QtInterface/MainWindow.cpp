@@ -11,13 +11,62 @@
 #include <QSplitter>
 #include <QListView>
 #include <QStringListModel>
+#include <QDesktopServices>
 
 
-MainWindow::MainWindow(QWidget* parent) :
-    QMainWindow(parent)
+MainWindow::MainWindow(AppCore& core,QWidget* parent) :
+    QMainWindow(parent),
+    m_core(core)
 {
     setUI();
+
+    connect(m_backBtn, &QPushButton::clicked, this, &MainWindow::onBackClicked);
+    connect(m_addressBar, &QLineEdit::returnPressed,this, &MainWindow::onAddressReturnPressed);
+    connect(m_fileView, &QListView::doubleClicked, this, &MainWindow::onFileDoubleClicked);
 }
+
+void MainWindow::updateView(const NavigationState& state)
+{
+    m_addressBar->setText(QString::fromStdString(state.GetCurrentPath().string()));
+
+    if(m_model)
+    {
+        m_model->updateData(state.GetCurrentFiles());
+    }
+
+}
+
+void MainWindow::onBackClicked()
+{
+    m_core.GoUp();
+}
+
+void MainWindow::onAddressReturnPressed()
+{
+    std::string pathStr = m_addressBar->text().toStdString();
+    m_core.Navigate(pathStr);
+}
+
+void MainWindow::onFileDoubleClicked(const QModelIndex& index)
+{
+    if(m_core.GetState().GetCurrentFiles()[index.row()].IsDirectory())
+    {
+        m_core.EnterDirectory(index.row());
+    }else if(m_core.GetState().GetCurrentFiles()[index.row()].GetPath().extension() == ".txt")
+    {
+        m_core.ExecuteFile(index.row());
+    }else
+    {
+        QString qPath = QString::fromStdString(m_core.GetState().GetCurrentFiles()[index.row()].GetPath().string());
+        
+        QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
+    
+    }
+    
+}
+
+
+
 
 void MainWindow::setUI()
 {
@@ -120,16 +169,10 @@ void MainWindow::setUI()
     m_splitter->setSizes(QList<int>() << 220 << 860); //задаем начальные размеры
 
 
-    #ifdef LOG_ENABLED
-    cout << "MainWindow заполнение тестовых данных для теста роботы модели" << endl;
-    std::vector<FileEntry> testData;
 
-    testData.push_back(FileEntry("path", "Work", 0, FileType::Directory, {}, false));
-    testData.push_back(FileEntry("/home/user/Cat.png", "Cat.png", 2048576, FileType::RegularFile, {}, false));
-    testData.push_back(FileEntry("/home/user/Notes.txt", "Notes.txt", 1024, FileType::RegularFile, {}, false));
 
-    m_model->updateData(testData);
-    cout<<"Конец заполнения тестовых данных для теста роботы модели"<<endl;
-    #endif
+
+
+
     
 }
