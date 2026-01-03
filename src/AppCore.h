@@ -8,7 +8,7 @@
 
 /// @brief класс основной логики программы
 ///@param state состояние навигации в файловой системе
-///@param render интерфейс рендеринга
+///@param OnStateChanged функция которая будет вызываться при изменении состояния
 class AppCore
 {
 private:
@@ -22,6 +22,8 @@ public:
 
     AppCore();
 
+    /// @brief возвращает текущее состояние навигации
+    /// @return константная ссылка на NavigationState
     const NavigationState& GetState() const 
     { 
         return state; 

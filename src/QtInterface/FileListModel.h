@@ -8,6 +8,11 @@
 #include "FileEntry.h"
 #include "NavigationState.h"
 
+/// @brief класс модели списка файлов для отображения в m_fileView
+/// @param m_files массив FileEntry с данными о файлах
+/// @param m_folderIcon иконка папки
+/// @param m_fileIcon иконка файла
+/// @param m_iconCache словарь для хранения иконок
 class FileListModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -20,6 +25,7 @@ public:
     void updateData(const std::vector<FileEntry>& newFiles);
 
     // --- переопределенные методы ---
+    
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 

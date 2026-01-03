@@ -29,6 +29,7 @@ class FileListModel;
 ///@param m_forwardBtn кнопка вперед
 ///@param m_addressBar адресная строка
 ///@param m_fileView элемент где будут отображатся все файлы
+///@param m_model модель списка файлов
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -36,6 +37,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(AppCore& core,QWidget* parent = nullptr);
 
+    /// @brief обновляет информацию о файлах для отображения в интерфейс
+    /// @param state текущее состояние навигации
     void updateView(const NavigationState& state);
 private:
     AppCore& m_core;
@@ -57,8 +60,14 @@ private:
     void setUI();
 
     private slots:
+
+        /// @brief обработчик нажатия кнопки назад в родительскую директорию
         void onBackClicked();
+
+        /// @brief обработчик нажатия кнопки вперед в дочернюю директорию
         void onAddressReturnPressed();
+
+        /// @brief обработчик двойного нажатия на файл
         void onFileDoubleClicked(const QModelIndex& index); 
 
 
