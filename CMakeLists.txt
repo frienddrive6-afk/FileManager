@@ -1,19 +1,36 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 
-project(FileManager)
+project(FileManager VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-include_directories(src)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
-add_executable(FileManager 
-    src/main.cpp 
-    src/FileEntry.cpp
+include_directories(src)
+include_directories(src/QtInterface)
+
+add_executable(FileManager
+    src/main.cpp
+    
+    src/resources.qrc
+
+    src/AppCore.cpp
     src/FileSystemManager.cpp
     src/NavigationState.cpp
-    src/AppCore.cpp
+    src/FileEntry.cpp
     src/ConsoleRender.cpp
+
+    src/QtInterface/MainWindow.h
+    src/QtInterface/MainWindow.cpp
+    src/QtInterface/FileListModel.h
+    src/QtInterface/FileListModel.cpp
 )
+
+target_link_libraries(FileManager PRIVATE Qt6::Widgets)

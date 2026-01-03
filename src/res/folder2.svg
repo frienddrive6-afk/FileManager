@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="2048px" height="2048px" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 2048 2048">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .back {fill:#F09E1A}
+    .front {fill:#FBC02D}
+    .shadow {fill:#E65100;fill-opacity:0.2}
+   ]]>
+  </style>
+ </defs>
+ <g id="Folder">
+  <!-- Задняя часть -->
+  <path class="back" d="M1664 1600l0 -992c0,-70 -58,-128 -128,-128l-576 0c-30,0 -60,-15 -80,-45l-64 -96c-20,-30 -50,-45 -80,-45l-352 0c-70,0 -128,58 -128,128l0 1178 1408 0z"/>
+  <!-- Тень внутри -->
+  <path class="shadow" d="M256 1600l0 -896 1408 0 0 896 -1408 0z"/>
+  <!-- Передняя часть -->
+  <path class="front" d="M1664 1792c0,70 -58,128 -128,128l-1280 0c-70,0 -128,-58 -128,-128l0 -960c0,-70 58,-128 128,-128l1280 0c70,0 128,58 128,128l0 960z"/>
+ </g>
+</svg>

@@ -1,0 +1,17 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource prefix="/">
+    <file>res/web_txt.svg</file>
+    <file>res/txt.svg</file>
+    <file>res/videos.svg</file>
+    <file>res/images.svg</file>
+    <file>res/pdf.svg</file>
+    <file>res/folder2.svg</file>
+    <file>res/folder.svg</file>
+    <file>res/forward.svg</file>
+    <file>res/file.svg</file>
+    <file>res/back.svg</file>
+    <file>res/audios.svg</file>
+    <file>res/archivse.svg</file>
+  </qresource>
+</RCC>
