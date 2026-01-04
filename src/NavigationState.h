@@ -88,8 +88,12 @@ public:
     void SortFiles();
 
 
+    vector<string> whoIsSelacted() const;
 
-
+    /// @brief Устанавливает выделение для файла по индексу
+    /// @param index индекс файла в текущем списке файлов
+    /// @param selected статус выделения
+    void SetFileSelection(int index, bool selected);
 
 
 };

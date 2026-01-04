@@ -64,4 +64,18 @@ public:
 
     ~AppCore();
 
+    /// @brief устанавливает выделение на указанных индексах
+    /// @param selectedIndices индексы которым нужно установить выделение
+    void SetSelection(const std::vector<int>& selectedIndices);
+
+    /// @return возвращает индексы выделенных файлов
+    vector<string> whoIsSelacted() const;
+
+    /// @brief возвращает имя указанного индекса
+    /// @param index индекс
+    string getNameOnIndex(int index);
+
+    void CreateFolder(string name);
+
+
 };

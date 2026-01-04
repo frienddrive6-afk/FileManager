@@ -254,3 +254,37 @@ void AppCore::Run(IRenderer& io)
         }
     }
 }
+
+
+
+
+void AppCore::SetSelection(const std::vector<int>& selectedIndices)
+{
+    state.ClearSelection();
+
+    for (int index : selectedIndices) {
+        state.SetFileSelection(index, true);
+    }
+}
+
+
+vector<string> AppCore::whoIsSelacted() const
+{
+    return state.whoIsSelacted();
+}
+
+
+string AppCore::getNameOnIndex(int index)
+{
+    return state.GetCurrentFiles()[index].GetName();
+}
+
+
+void AppCore::CreateFolder(string name)
+{
+
+    FileSystemManager::CreateDirectory(state.GetCurrentPath(), name);
+
+    Navigate(state.GetCurrentPath());
+
+}

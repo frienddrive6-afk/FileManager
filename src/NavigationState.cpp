@@ -155,3 +155,29 @@ void NavigationState::SortFiles()
         return this->currentSortAlgo(a, b);
     });
 }
+
+
+vector<string> NavigationState::whoIsSelacted() const
+{
+    vector<string> selectedFiles;
+
+    for(FileEntry file : currentFiles)
+    {
+        if(file.IsSelected())
+        {
+            string temp = "--" + file.GetName() + " is salected";
+            selectedFiles.push_back(temp);
+        }
+    }
+
+    return selectedFiles;
+}
+
+
+void NavigationState::SetFileSelection(int index, bool selected)
+{
+    if (index >= 0 && index < currentFiles.size())
+    {
+        currentFiles[index].SetSelected(selected);
+    }
+}

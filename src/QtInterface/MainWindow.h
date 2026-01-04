@@ -14,6 +14,7 @@ class QListView;
 class QPushButton;
 class QLineEdit;
 class FileListModel;
+class QStandardItemModel;
 
 
 
@@ -55,6 +56,7 @@ private:
     QLineEdit* m_addressBar;
     QListView* m_fileView;
     FileListModel* m_model;
+    QStandardItemModel* m_sideBarModel;
 
 
     void setUI();
@@ -68,7 +70,16 @@ private:
         void onAddressReturnPressed();
 
         /// @brief обработчик двойного нажатия на файл
-        void onFileDoubleClicked(const QModelIndex& index); 
+        void onFileDoubleClicked(const QModelIndex& index);
+        
+        /// @brief переходит в указанную директорию
+        /// @param index индекс директории типа QModelIndex
+        void goToDirectory(const QModelIndex& index);
+
+        /// @brief обработчик изменения выделения
+        void onSelectionChanged();
+
+        void onContextMenuRequested(const QPoint &pos);
 
 
 };
