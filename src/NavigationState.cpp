@@ -165,8 +165,24 @@ vector<string> NavigationState::whoIsSelacted() const
     {
         if(file.IsSelected())
         {
-            string temp = "--" + file.GetName() + " is salected";
+            string temp = file.GetPath().string();
             selectedFiles.push_back(temp);
+        }
+    }
+
+    return selectedFiles;
+}
+
+vector<filesystem::path> NavigationState::whoIsSelactedPath() const
+{
+
+    vector<filesystem::path> selectedFiles;
+
+    for(FileEntry file : currentFiles)
+    {
+        if(file.IsSelected())
+        {
+            selectedFiles.push_back(file.GetPath());
         }
     }
 

@@ -26,16 +26,13 @@ int FileListModel::rowCount(const QModelIndex &parent) const
 
 QVariant FileListModel::data(const QModelIndex &index, int role) const
 {
-    // Проверки на соотвецтвие
     if (!index.isValid() || index.row() >= m_files.size() || index.row() < 0)
         return QVariant();
 
-    // Сохраняем ссылку на элемент какое надо будет отбразить
     const FileEntry& file = m_files[index.row()];
 
     // роль DisplayRole это текст возвращает отформатированый текст для отобрадения имени и размера
     if (role == Qt::DisplayRole) {
-        // Конвертация string -> QString
         QString name = QString::fromStdString(file.GetName());
         
         QString size = QString::fromStdString(file.GetFormattedSize());

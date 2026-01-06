@@ -178,6 +178,31 @@ void AppCore::OnPasteRequest()
 }
 
 
+void AppCore::OnRenameRequest(const string& name)
+{
+    filesystem::path oldPath;
+    bool found = false;
+
+    for(const FileEntry& entry : state.GetCurrentFiles())
+    {
+        if(entry.IsSelected())
+        {
+            oldPath = entry.GetPath();
+            found = true;
+            break; 
+        }
+    }
+
+    
+    if (!found) return;
+
+    FileSystemManager::Rename(oldPath, name);
+
+    Navigate(state.GetCurrentPath());
+
+}
+
+
 
 void AppCore::Run(IRenderer& io)
 {
@@ -271,6 +296,11 @@ void AppCore::SetSelection(const std::vector<int>& selectedIndices)
 vector<string> AppCore::whoIsSelacted() const
 {
     return state.whoIsSelacted();
+}
+
+vector<filesystem::path> AppCore::whoIsSelactedPath() const
+{
+    return state.whoIsSelactedPath();
 }
 
 

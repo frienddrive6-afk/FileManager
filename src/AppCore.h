@@ -58,6 +58,10 @@ public:
     /// @brief вставляет выделеный файл или группу файлов из буфера обмена
     void OnPasteRequest();
 
+    /// @brief переименовывает выделеный файл через FileSystemManager
+    /// @param name новое имя
+    void OnRenameRequest(const string& name);
+
 
     /// @brief запускает основной цикл программы в котором происходит рендеринг интерфейса и взаимодействие с пользователем
    void Run(IRenderer& io);
@@ -70,11 +74,15 @@ public:
 
     /// @return возвращает индексы выделенных файлов
     vector<string> whoIsSelacted() const;
+    
+    vector<filesystem::path> whoIsSelactedPath() const;
 
     /// @brief возвращает имя указанного индекса
     /// @param index индекс
     string getNameOnIndex(int index);
 
+    /// @brief создает папку
+    /// @param name имя папки
     void CreateFolder(string name);
 
 

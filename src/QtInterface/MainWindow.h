@@ -61,6 +61,8 @@ private:
 
     void setUI();
 
+    void setStyleSheetsForMainWindow();
+
     private slots:
 
         /// @brief обработчик нажатия кнопки назад в родительскую директорию

@@ -87,8 +87,12 @@ public:
     /// @brief сортирует текущие файлы в соответствии с текущим режимом сортировки
     void SortFiles();
 
-
+    /// @brief возвращает список индексов выделенных файлов
+    /// @return вектор индексов типа string
     vector<string> whoIsSelacted() const;
+
+    vector<filesystem::path> whoIsSelactedPath() const;
+
 
     /// @brief Устанавливает выделение для файла по индексу
     /// @param index индекс файла в текущем списке файлов
