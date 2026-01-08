@@ -86,4 +86,9 @@ public:
     void CreateFolder(string name);
 
 
+    /// @brief Возвращает заполненную структуру со всей инфой
+    /// @param targetPath путь к директории
+    FileProperties GetProperties(const filesystem::path& targetPath);
+
+
 };

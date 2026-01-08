@@ -233,3 +233,91 @@ void FileSystemManager::CreateEmtyTXTFile(const filesystem::path& path,const str
 
 
 }
+
+
+
+
+DirectoryInfo FileSystemManager::GetDirectoryInfo(const filesystem::path& path)
+{
+
+    DirectoryInfo info = {0, 0, 0};
+    
+    // Проверяем существование пути и является ли он директорией
+    if(!filesystem::exists(path) || !filesystem::is_directory(path))
+    {
+        return info;
+    }
+
+    auto options = filesystem::directory_options::skip_permission_denied;  // чтобы избежать исключений при отсутствии доступа к папкам
+ 
+
+    for(const auto& enty : filesystem::recursive_directory_iterator(path, options))
+    {
+        std::error_code ec;
+        
+        if(enty.is_regular_file(ec))
+        {
+            info.fileCount++;
+            info.totalSize += filesystem::file_size(enty.path(), ec);
+            
+        }else if(enty.is_directory(ec))
+        {
+            info.folderCount++;
+        }
+        
+        if(ec)
+        {
+            #ifdef LOG_ENABLED
+            cerr<<"Ошибка получения информации о директории: "<<ec.message()<<endl;
+            #endif
+        }
+
+    }
+
+
+    return info;
+
+}
+
+
+
+string FileSystemManager::FormatTime(filesystem::file_time_type ftime)
+{
+
+    // Преобразование file_time_type в time_t
+    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+        ftime - filesystem::file_time_type::clock::now() + std::chrono::system_clock::now()
+    );
+    std::time_t tt = std::chrono::system_clock::to_time_t(sctp);
+    
+    std::tm* gmt = std::localtime(&tt);
+    std::stringstream ss;
+    ss.imbue(std::locale("ru_RU.UTF-8"));
+    
+    // Формат: %e (день), %B (полный месяц), %Y (год), %H:%M:%S (время)
+    ss << std::put_time(gmt, "%e %B %Y %H:%M:%S");
+    return ss.str();
+
+}
+
+
+string FileSystemManager::FormatSize(uintmax_t size)
+{
+
+    const char* suffixes[] = { "B", "KB", "MB", "GB", "TB", "PB" };
+    int suffixIndex = 0;
+    
+    double doubleSize = static_cast<double>(size);
+
+    while (doubleSize >= 1024.0 && suffixIndex < 5)
+    {
+        doubleSize /= 1024.0;
+        suffixIndex++;
+    }
+
+    stringstream ss;
+    ss << fixed << setprecision(2) << doubleSize << " " << suffixes[suffixIndex];
+    return ss.str();
+
+
+}

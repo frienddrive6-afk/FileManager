@@ -52,4 +52,11 @@ public:
     /// @param name имя создаваемого текстового файла
     static void CreateEmtyTXTFile(const filesystem::path& path,const string& name);
 
+
+    
+    static DirectoryInfo GetDirectoryInfo(const filesystem::path& path);
+
+    static string FormatTime(filesystem::file_time_type ftime);
+
+    static string FormatSize(uintmax_t size);
 };

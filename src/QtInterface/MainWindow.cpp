@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "FileListModel.h"
+#include "Types.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -22,6 +23,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QInputDialog>
+#include <QFormLayout>
 
 
 MainWindow::MainWindow(AppCore& core,QWidget* parent) :
@@ -154,35 +156,6 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
         });
 
 
-        // QAction* renameFile = menu->addAction("Переименовать");
-        // connect(renameFile, &QAction::triggered, this, [this, index](){
-        //     QMenu* renameFileMenu = new QMenu(this);
-
-        //     QLineEdit* foldernameEdit = new QLineEdit();
-        //     foldernameEdit->setText(QString::fromStdString(m_core.getNameOnIndex(index.row())));
-        //     foldernameEdit->selectAll(); 
-
-        //     QWidgetAction* editAction = new QWidgetAction(renameFileMenu);
-        //     editAction->setDefaultWidget(foldernameEdit);
-        //     renameFileMenu->addAction(editAction);
-
-        //     connect(foldernameEdit, &QLineEdit::returnPressed, [=](){
-        //         QString newName = foldernameEdit->text();
-        //         if(!newName.isEmpty())
-        //         {
-        //             m_core.OnRenameRequest(newName.toStdString()); 
-        //             updateView(m_core.GetState());
-        //         }
-        //         renameFileMenu->close(); 
-        //     });
-
-        //     foldernameEdit->setFocus();
-
-        //     renameFileMenu->exec(QCursor::pos());
-
-        //     renameFileMenu->deleteLater();
-        // });
-
         QAction* renameFile = menu->addAction("Переименовать");
         connect(renameFile, &QAction::triggered, this, [this, index](){
             
@@ -217,63 +190,6 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
             }
         });
         
-
-        // QAction* createArchive = menu->addAction("Создать архив");
-        // connect(createArchive, &QAction::triggered, this, [this](){
-            
-        //     std::vector<filesystem::path> selectedFiles = m_core.whoIsSelactedPath();
-            
-        //     if (selectedFiles.empty()) return;
-
-        //     QMenu* inputNameMenu = new QMenu(this);
-
-        //     QLineEdit* archivenameEdit = new QLineEdit();
-        //     archivenameEdit->setText("archive.zip");
-        //     archivenameEdit->selectAll(); 
-
-        //     QWidgetAction* editAction = new QWidgetAction(inputNameMenu);
-        //     editAction->setDefaultWidget(archivenameEdit);
-        //     inputNameMenu->addAction(editAction);
-
-        //     archivenameEdit->setFocus(); 
-
-        //     connect(archivenameEdit, &QLineEdit::returnPressed, [=](){ 
-                
-        //         QString newName = archivenameEdit->text();
-                
-        //         if(!newName.isEmpty())
-        //         {
-        //             QStringList arguments;
-        //             arguments << "-r";           
-        //             arguments << newName;        
-
-        //             for(const filesystem::path& path : selectedFiles) {
-        //                 arguments << QString::fromStdString(path.filename().string());
-        //             }
-
-        //             QString workingDir = QString::fromStdString(m_core.GetState().GetCurrentPath().string());
-
-        //             bool isStarted = QProcess::startDetached("zip", arguments, workingDir);
-
-        //             #ifdef LOG_APP_CORE
-        //             if(isStarted) {
-        //                 qDebug() << "Архивация запущена:" << arguments.join(" ");
-        //             } else {
-        //                 qDebug() << "Ошибка запуска";
-        //             }
-        //             #endif
-                    
-        //             inputNameMenu->close();
-                    
-                    
-        //         }
-        //     });
-
-        //     inputNameMenu->exec(QCursor::pos());
-            
-        //     inputNameMenu->deleteLater();
-        //     updateView(m_core.GetState());
-        // });
 
 
         QAction* createArchive = menu->addAction("Создать архив");
@@ -341,7 +257,13 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
         menu->addSeparator();
         
-        menu->addAction("Свойства"); // Пока пустышка
+        QAction *propertiesAction = menu->addAction("Свойства");
+        connect(propertiesAction, &QAction::triggered, this, [this, index](){
+
+            string path = m_core.GetState().GetCurrentFiles()[index.row()].GetPath().string();
+            
+            showPropertiesDialog(path);
+        });
     } 
     else { //Окно при нажатии на пустое место
         
@@ -424,7 +346,11 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
         QAction *infoThisFolder = menu->addAction("Свойства");
         connect(infoThisFolder, &QAction::triggered, this, [this](){
-            //добавить логику
+            
+            string path = m_core.GetState().GetCurrentPath().string();
+        
+            showPropertiesDialog(path);
+
         });
 
     }
@@ -433,6 +359,150 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
     menu->deleteLater(); //Удаляем меню из памяти то как каждый раз создается новое
 }
+
+
+
+
+
+void MainWindow::showPropertiesDialog(const std::string& path)
+{
+    FileProperties props = m_core.GetProperties(path);
+
+    QDialog dialog(this);
+    dialog.setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);   //удаляет внешнюю рамку операционной системы + окно является диалоговым
+    dialog.setAttribute(Qt::WA_TranslucentBackground); // Делаем саму подложку окна прозрачной
+    dialog.setFixedWidth(400); 
+
+    QVBoxLayout* dialogLayout = new QVBoxLayout(&dialog);
+    dialogLayout->setContentsMargins(0, 0, 0, 0);   //убрать отступы
+
+
+    QFrame* backgroundFrame = new QFrame(); //фон окна
+    backgroundFrame->setObjectName("MainBackground");
+
+    dialog.setStyleSheet(
+        "QFrame#MainBackground {"
+        "   background-color: #f6f6f6;"   
+        "   border-radius: 12px;"         
+        "   border: 1px solid #dbdbdb;"   
+        "}"
+        "QLabel { color: #2e3436; font-size: 14px; }"
+        "QLabel#Title { font-size: 18px; font-weight: bold; }"
+        "QLabel#SubTitle { color: #5e5c64; font-size: 13px; }"
+        
+        "QFrame#InfoCard { background-color: #ffffff; border-radius: 8px; border: 1px solid #dedede; }"
+        
+        "QPushButton { border: none; border-radius: 4px; padding: 4px; }"
+        "QPushButton:hover { background-color: #e8e8e8; }"
+    );
+
+    dialogLayout->addWidget(backgroundFrame);
+
+    QVBoxLayout* mainLayout = new QVBoxLayout(backgroundFrame);
+    mainLayout->setContentsMargins(10, 10, 10, 10);
+    mainLayout->setSpacing(15);
+
+    // ШАПКА (Header)
+    QHBoxLayout* headerLayout = new QHBoxLayout();
+    
+    QPushButton* starBtn = new QPushButton();
+    starBtn->setIcon(QIcon(":/res/star.svg")); 
+    starBtn->setToolTip("Добавить в избранное");
+    
+    QPushButton* closeBtn = new QPushButton();
+    closeBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
+    closeBtn->setToolTip("Закрыть");
+    connect(closeBtn, &QPushButton::clicked, &dialog, &QDialog::accept);
+
+    headerLayout->addWidget(starBtn);
+    headerLayout->addStretch();
+    headerLayout->addWidget(closeBtn);
+
+    mainLayout->addLayout(headerLayout);
+
+    // ОСНОВНАЯ ИНФОРМАЦИЯ
+    QVBoxLayout* infoLayout = new QVBoxLayout();
+    infoLayout->setAlignment(Qt::AlignCenter);
+
+    // большаяконка
+    QLabel* iconLabel = new QLabel();
+    QString iconPath = props.isDirectory ? ":/res/folder.svg" : ":/res/file.svg"; 
+    iconLabel->setPixmap(QIcon(iconPath).pixmap(64, 64));
+    iconLabel->setAlignment(Qt::AlignCenter);
+
+    // Имя
+    QLabel* nameLabel = new QLabel(QString::fromStdString(props.name));
+    nameLabel->setObjectName("Title");
+    nameLabel->setAlignment(Qt::AlignCenter);
+    nameLabel->setWordWrap(true);  //Разрешить перенос
+
+    // Детали
+    QString detailsText;
+    if (props.isDirectory) {
+        detailsText = QString("%1 объектов").arg(props.fileCount + props.folderCount) + ",   " + QString::fromStdString( FileSystemManager::FormatSize(props.size));
+    } else {
+        // detailsText = QString("%1 байт").arg(props.size); 
+        detailsText = QString::fromStdString( FileSystemManager::FormatSize(props.size));
+    }
+    QLabel* sizeLabel = new QLabel(detailsText);
+    sizeLabel->setObjectName("SubTitle");
+    sizeLabel->setAlignment(Qt::AlignCenter);
+
+    infoLayout->addWidget(iconLabel);
+    infoLayout->addWidget(nameLabel);
+    infoLayout->addWidget(sizeLabel);
+
+    mainLayout->addLayout(infoLayout);
+
+    // КАРТОЧКА СВОЙСТВ
+    QFrame* infoCard = new QFrame();
+    infoCard->setObjectName("InfoCard");
+    
+    QFormLayout* formLayout = new QFormLayout(infoCard);
+    formLayout->setLabelAlignment(Qt::AlignLeft);
+    formLayout->setVerticalSpacing(12);
+    formLayout->setContentsMargins(15, 15, 15, 15);
+
+    // Родительская папка
+    QLabel* parentValue = new QLabel(QString::fromStdString(props.parentPath));
+    parentValue->setWordWrap(true);
+    formLayout->addRow("Родительская папка", parentValue);
+
+    // Дата изменения
+    QLabel* modifiedValue = new QLabel(QString::fromStdString(props.dateModified));
+    formLayout->addRow("Последнее изменение", modifiedValue);
+
+    // Дата создания
+    QLabel* createdValue = new QLabel("Временно недоступно");
+    createdValue->setStyleSheet("color: #999; font-style: italic;");
+    formLayout->addRow("Создано", createdValue);
+
+    mainLayout->addWidget(infoCard);
+
+    
+    // КАРТОЧКА РАЗРЕШЕНИЙ
+    
+    QFrame* permCard = new QFrame();
+    permCard->setObjectName("InfoCard");
+    QHBoxLayout* permLayout = new QHBoxLayout(permCard);
+    
+    QLabel* permTitle = new QLabel("Разрешения");
+    QLabel* permLink = new QLabel("Создание и удаление файлов >");
+    permLink->setObjectName("SubTitle");
+    permLink->setAlignment(Qt::AlignRight);
+
+    permLayout->addWidget(permTitle);
+    permLayout->addWidget(permLink);
+
+    mainLayout->addWidget(permCard);
+
+    mainLayout->addStretch();
+
+    
+    dialog.exec();  //показать
+}
+
+
 
 
 

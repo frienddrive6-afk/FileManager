@@ -81,7 +81,12 @@ private:
         /// @brief обработчик изменения выделения
         void onSelectionChanged();
 
+        /// @brief обработчик контекстного меню
+        /// @param pos позиция где создавать
         void onContextMenuRequested(const QPoint &pos);
+
+        
+        void showPropertiesDialog(const std::string& path);
 
 
 };

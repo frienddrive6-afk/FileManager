@@ -318,3 +318,39 @@ void AppCore::CreateFolder(string name)
     Navigate(state.GetCurrentPath());
 
 }
+
+
+FileProperties AppCore::GetProperties(const filesystem::path& targetPath)
+{
+
+    FileProperties props;
+    
+    //  Базовая инфа
+    props.name = targetPath.filename().string();
+    props.fullPath = targetPath.string();
+    props.parentPath = targetPath.parent_path().string();
+    
+    if (props.name.empty()) props.name = props.fullPath;
+
+    // Дата и Тип
+    error_code ec;
+    props.isDirectory = filesystem::is_directory(targetPath, ec);
+    auto time = filesystem::last_write_time(targetPath, ec);
+    props.dateModified = FileSystemManager::FormatTime(time);
+
+    //  Подсчет размеров
+    if (props.isDirectory) {            // Если папка  запускаем рекурсивный сканер
+        DirectoryInfo stats = FileSystemManager::GetDirectoryInfo(targetPath);
+        props.size = stats.totalSize;
+        props.fileCount = stats.fileCount;
+        props.folderCount = stats.folderCount;
+    } 
+    else {                              // Если файл берем размер 
+        props.size = filesystem::file_size(targetPath, ec);
+        props.fileCount = 0;
+        props.folderCount = 0;
+    }
+
+    return props;
+
+}

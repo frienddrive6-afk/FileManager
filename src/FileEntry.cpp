@@ -18,6 +18,7 @@
 
 #include "main.h"
 #include "FileEntry.h"
+#include "FileSystemManager.h"
 
 using namespace std;
 
@@ -51,20 +52,7 @@ string FileEntry::GetFormattedSize() const
 {
     if (IsDirectory()) return "<DIR>"; 
 
-    const char* suffixes[] = { "B", "KB", "MB", "GB", "TB", "PB" };
-    int suffixIndex = 0;
-    
-    double doubleSize = static_cast<double>(this->size);
-
-    while (doubleSize >= 1024.0 && suffixIndex < 5)
-    {
-        doubleSize /= 1024.0;
-        suffixIndex++;
-    }
-
-    stringstream ss;
-    ss << fixed << setprecision(2) << doubleSize << " " << suffixes[suffixIndex];
-    return ss.str();
+    return FileSystemManager::FormatSize(this->size);
 }
 
 string FileEntry::GetName() const
