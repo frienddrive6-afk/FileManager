@@ -80,7 +80,15 @@ private:
     /// @brief установка действий
     void setupActions();
 
+    /// @brief получает текст с клавиатуры в модальном окне
     QString getUserInput(QString defaultText);
+
+    /// @brief упрощенная функция для создания QAction с shotcut
+    /// @param text Названия действия
+    /// @param shortcut к каким клавишам будет привязан
+    /// @param slot функция которая будет вызываться при нажатии
+    /// @return созданный QAction
+    QAction* createAction(QString text, QKeySequence shortcut, std::function<void()> slot);
 
     private slots:
 

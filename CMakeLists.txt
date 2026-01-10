@@ -31,6 +31,8 @@ add_executable(FileManager
     src/QtInterface/MainWindow.cpp
     src/QtInterface/FileListModel.h
     src/QtInterface/FileListModel.cpp
+    src/QtInterface/MainWindow_UI.cpp
+    src/QtInterface/MainWindow_Slots.cpp
 )
 
 target_link_libraries(FileManager PRIVATE Qt6::Widgets)
