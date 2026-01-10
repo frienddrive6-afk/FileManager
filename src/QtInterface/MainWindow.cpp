@@ -25,6 +25,8 @@
 #include <QInputDialog>
 #include <QFormLayout>
 #include <fstream>
+#include <QDir>
+#include <QStandardPaths>
 
 
 MainWindow::MainWindow(AppCore& core,QWidget* parent) :
@@ -168,7 +170,7 @@ void MainWindow::setupActions()
 
 }
 
-QString MainWindow::QLineEditAction(QString text)
+QString MainWindow::getUserInput(QString defaultText)
 {
 
     QDialog dialog(this);
@@ -183,7 +185,7 @@ QString MainWindow::QLineEditAction(QString text)
     layout.setSpacing(0);
 
     QLineEdit nameEdit;
-    nameEdit.setText(text);
+    nameEdit.setText(defaultText);
     nameEdit.selectAll(); 
     nameEdit.setFrame(false);
             
@@ -216,11 +218,11 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
     QMenu *menu = new QMenu(this);
     
-    menu->setStyleSheet(
-        "QMenu { background-color: white; border: 1px solid gray; }"
-        "QMenu::item { padding: 5px 20px; }"
-        "QMenu::item:selected { background-color: #0078d7; color: white; }"
-    );
+    // menu->setStyleSheet(
+    //     "QMenu { background-color: white; border: 1px solid gray; }"
+    //     "QMenu::item { padding: 5px 20px; }"
+    //     "QMenu::item:selected { background-color: #0078d7; color: white; }"
+    // );
 
     if (index.isValid()) { //Окно при нажатии на файл
 
@@ -244,7 +246,7 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
         QAction* renameFile = menu->addAction("Переименовать");
         connect(renameFile, &QAction::triggered, this, [this, index](){
-            m_core.OnRenameRequest(QLineEditAction(QString::fromStdString(m_core.getNameOnIndex(index.row()))).toStdString()); 
+            m_core.OnRenameRequest(getUserInput(QString::fromStdString(m_core.getNameOnIndex(index.row()))).toStdString()); 
             updateView(m_core.GetState());
         });
         
@@ -256,7 +258,7 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
             std::vector<filesystem::path> selectedFiles = m_core.whoIsSelactedPath();
             if (selectedFiles.empty()) return;
 
-            QString newName = QLineEditAction("archive.zip");
+            QString newName = getUserInput("archive.zip");
             if(!newName.isEmpty())
             {
                 QStringList arguments;
@@ -299,7 +301,7 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
         QAction *createFolder = menu->addAction("Создать папку");
         connect(createFolder, &QAction::triggered, this, [this](){
-            m_core.CreateFolder(QLineEditAction("New Folder").toStdString());
+            m_core.CreateFolder(getUserInput("New Folder").toStdString());
             updateView(m_core.GetState());
         });
 
@@ -339,11 +341,8 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
         QAction* createTXT = menu->addAction("Создать текстовый документ");
         connect(createTXT, &QAction::triggered, this, [this](){
-            // QString workingDir = QString::fromStdWString(m_core.GetState().GetCurrentPath().wstring());
 
-            // bool success = QProcess::startDetached(">>", {QLineEditAction("newFile.txt")}, workingDir);
-
-            filesystem::path path = m_core.GetState().GetCurrentPath() / QLineEditAction("newFile.txt").toStdString();
+            filesystem::path path = m_core.GetState().GetCurrentPath() / getUserInput("newFile.txt").toStdString();
             ofstream file(path);
             if(file.is_open())
             {
@@ -353,7 +352,6 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
                 #endif
             }
 
-            // m_core.CreateFile("newFile.txt");
             updateView(m_core.GetState());
         });
 
@@ -576,17 +574,17 @@ void MainWindow::setUI()
 
     QStandardItem* homeItem = new QStandardItem("Home");
     homeItem->setIcon(QIcon(":/res/folder.svg")); 
-    homeItem->setData("/home/nomantb", Qt::UserRole); 
+    homeItem->setData(QDir::homePath(), Qt::UserRole);
     items.append(homeItem);
 
     QStandardItem* docItem = new QStandardItem("Documents");
     docItem->setIcon(QIcon(":/res/folder.svg"));
-    docItem->setData("/home/nomantb/Документы", Qt::UserRole);
+    docItem->setData(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation), Qt::UserRole);
     items.append(docItem);
 
     QStandardItem* downItem = new QStandardItem("Downloads");
     downItem->setIcon(QIcon(":/res/folder.svg")); 
-    downItem->setData("/home/nomantb/Загрузки", Qt::UserRole);
+    downItem->setData(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), Qt::UserRole);
     items.append(downItem);
 
     QStandardItem* testFolder = new QStandardItem("test_file_Manedger");
@@ -692,6 +690,11 @@ void MainWindow::setStyleSheetsForMainWindow()
         "   selection-background-color: #0078d7;"
         "   selection-color: white;" 
         "}"
+
+        
+        "QMenu { background-color: white; border: 1px solid gray; }"
+        "QMenu::item { padding: 5px 20px; }"
+        "QMenu::item:selected { background-color: #0078d7; color: white; }"
     );
 
 }

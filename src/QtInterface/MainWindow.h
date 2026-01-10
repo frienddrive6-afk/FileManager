@@ -80,7 +80,7 @@ private:
     /// @brief установка действий
     void setupActions();
 
-    QString QLineEditAction(QString text);
+    QString getUserInput(QString defaultText);
 
     private slots:
 
