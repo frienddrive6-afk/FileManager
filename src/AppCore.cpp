@@ -202,6 +202,11 @@ void AppCore::OnRenameRequest(const string& name)
 
 }
 
+void AppCore::OnSelectAllRequest()
+{
+    state.SelectAll();
+}
+
 
 
 void AppCore::Run(IRenderer& io)

@@ -24,6 +24,7 @@
 #include <QDialogButtonBox>
 #include <QInputDialog>
 #include <QFormLayout>
+#include <fstream>
 
 
 MainWindow::MainWindow(AppCore& core,QWidget* parent) :
@@ -31,6 +32,7 @@ MainWindow::MainWindow(AppCore& core,QWidget* parent) :
     m_core(core)
 {
     setUI();
+    setupActions();
 
     connect(m_backBtn, &QPushButton::clicked, this, &MainWindow::onBackClicked);
     connect(m_addressBar, &QLineEdit::returnPressed,this, &MainWindow::onAddressReturnPressed);
@@ -116,6 +118,98 @@ void MainWindow::onSelectionChanged()
     #endif
 }
 
+void MainWindow::setupActions()
+{
+    // КОПИРОВАНИЕ (Ctrl + C)
+    m_copyAction = new QAction("Копировать", this);
+    m_copyAction->setShortcut(QKeySequence::Copy);      //QKeySequence::Copy это Ctrl+C
+    this->addAction(m_copyAction); 
+    connect(m_copyAction, &QAction::triggered, this, [this](){
+        m_core.OnCopyRequest();
+        updateView(m_core.GetState());
+    });
+
+    // ВЫРЕЗАНИЕ (Ctrl + X)
+    m_cutAction = new QAction("Вырезать", this);
+    m_cutAction->setShortcut(QKeySequence::Cut);         //Ctrl + X
+    this->addAction(m_cutAction);
+    connect(m_cutAction, &QAction::triggered, this, [this](){
+        m_core.OnCutRequest();
+        updateView(m_core.GetState());
+    });
+
+    // ВСТАВИТЬ (Ctrl + V)
+    m_pasteAction = new QAction("Вставить", this);
+    m_pasteAction->setShortcut(QKeySequence::Paste);
+    this->addAction(m_pasteAction);
+    connect(m_pasteAction, &QAction::triggered, this, [this](){
+        m_core.OnPasteRequest();
+        updateView(m_core.GetState());
+    });
+
+    // УДАЛЕНИЕ (Del)
+    m_deleteAction = new QAction("Удалить", this);
+    m_deleteAction->setShortcut(QKeySequence::Delete);      // Del
+    this->addAction(m_deleteAction);
+    connect(m_deleteAction, &QAction::triggered, this, [this](){
+        m_core.OnDeleteRequest();
+        updateView(m_core.GetState());
+    });
+
+
+    //ВЫДЕЛИТЬ ВСЕ
+    m_secectAll = new QAction("Выделить все", this);
+    m_secectAll->setShortcut(QKeySequence::SelectAll);       //Ctrl + A
+    this->addAction(m_secectAll);
+    connect(m_secectAll, &QAction::triggered, this, [this](){
+        m_core.OnSelectAllRequest();
+        updateView(m_core.GetState());
+    });
+
+}
+
+QString MainWindow::QLineEditAction(QString text)
+{
+
+    QDialog dialog(this);
+            
+    dialog.setWindowFlags(Qt::FramelessWindowHint | Qt::Popup);          //Qt::FramelessWindowHint полностью удаляет стандартную рамку ОС, Qt::Popup превращает окно во всплывающее
+            
+    dialog.setAttribute(Qt::WA_TranslucentBackground); //делает фон окна полностью прозрачным
+
+
+    QVBoxLayout layout(&dialog);
+    layout.setContentsMargins(0, 0, 0, 0);
+    layout.setSpacing(0);
+
+    QLineEdit nameEdit;
+    nameEdit.setText(text);
+    nameEdit.selectAll(); 
+    nameEdit.setFrame(false);
+            
+    nameEdit.setProperty("class", "foldername");
+            
+    layout.addWidget(&nameEdit);
+
+    connect(&nameEdit, &QLineEdit::returnPressed, &dialog, &QDialog::accept);
+
+    dialog.setFixedWidth(200); 
+            
+    dialog.move(QCursor::pos() - QPoint(10, 15));
+
+    if (dialog.exec() == QDialog::Accepted) {
+        QString newName = nameEdit.text();
+        if (!newName.isEmpty()) {
+            return newName;
+        }
+    }
+
+    return QString{};
+
+}
+
+
+
 void MainWindow::onContextMenuRequested(const QPoint &pos)
 {
     QModelIndex index = m_fileView->indexAt(pos);
@@ -142,52 +236,16 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
 
 
-        QAction* cutFile = menu->addAction("Вырезать");
-        connect(cutFile, &QAction::triggered, this, [this](){
-            m_core.OnCutRequest();
-            updateView(m_core.GetState());
-        });
+        menu->addAction(m_cutAction);
         
 
-        QAction* copyFilse = menu->addAction("Копировать");
-        connect(copyFilse, &QAction::triggered, this, [this](){
-            m_core.OnCopyRequest();
-            updateView(m_core.GetState());
-        });
+        menu->addAction(m_copyAction);
 
 
         QAction* renameFile = menu->addAction("Переименовать");
         connect(renameFile, &QAction::triggered, this, [this, index](){
-            
-            QDialog dialog(this);
-            dialog.setWindowFlags(Qt::FramelessWindowHint | Qt::Popup);
-            dialog.setAttribute(Qt::WA_TranslucentBackground);
-
-            QVBoxLayout layout(&dialog);
-            layout.setContentsMargins(0, 0, 0, 0);
-            layout.setSpacing(0);
-
-            QLineEdit nameEdit;
-            nameEdit.setText(QString::fromStdString(m_core.getNameOnIndex(index.row())));
-            nameEdit.selectAll(); 
-            nameEdit.setFrame(false);
-            nameEdit.setProperty("class", "foldername");
-
-            layout.addWidget(&nameEdit);
-
-            connect(&nameEdit, &QLineEdit::returnPressed, &dialog, &QDialog::accept);
-
-            dialog.setFixedWidth(200);
-            dialog.move(QCursor::pos() - QPoint(10, 15));
-
-            if (dialog.exec() == QDialog::Accepted) {
-                QString newName = nameEdit.text();
-                if(!newName.isEmpty())
-                {
-                    m_core.OnRenameRequest(newName.toStdString()); 
-                    updateView(m_core.GetState());
-                }
-            }
+            m_core.OnRenameRequest(QLineEditAction(QString::fromStdString(m_core.getNameOnIndex(index.row()))).toStdString()); 
+            updateView(m_core.GetState());
         });
         
 
@@ -198,62 +256,33 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
             std::vector<filesystem::path> selectedFiles = m_core.whoIsSelactedPath();
             if (selectedFiles.empty()) return;
 
-            QDialog dialog(this);
-            dialog.setWindowFlags(Qt::FramelessWindowHint | Qt::Popup);
-            dialog.setAttribute(Qt::WA_TranslucentBackground);
+            QString newName = QLineEditAction("archive.zip");
+            if(!newName.isEmpty())
+            {
+                QStringList arguments;
+                arguments << "-r" << newName;        
 
-            QVBoxLayout layout(&dialog);
-            layout.setContentsMargins(0, 0, 0, 0);
-            layout.setSpacing(0);
-
-            QLineEdit nameEdit;
-            nameEdit.setText("archive.zip");
-            nameEdit.selectAll(); 
-            nameEdit.setFrame(false);
-            nameEdit.setProperty("class", "foldername");
-
-            layout.addWidget(&nameEdit);
-
-            connect(&nameEdit, &QLineEdit::returnPressed, &dialog, &QDialog::accept);
-
-            dialog.setFixedWidth(200);
-            dialog.move(QCursor::pos() - QPoint(10, 15));
-
-            if (dialog.exec() == QDialog::Accepted) {
-                
-                QString newName = nameEdit.text();
-                if(!newName.isEmpty())
-                {
-                    QStringList arguments;
-                    arguments << "-r" << newName;        
-
-                    for(const filesystem::path& path : selectedFiles) {
-                        arguments << QString::fromStdString(path.filename().string());
-                    }
-
-                    QString workingDir = QString::fromStdString(m_core.GetState().GetCurrentPath().string());
-
-                    bool isStarted = QProcess::startDetached("zip", arguments, workingDir);
-
-                    #ifdef LOG_APP_CORE
-                    if(isStarted) {
-                        qDebug() << "Архивация запущена:" << arguments.join(" ");
-                    } else {
-                        qDebug() << "Ошибка запуска";
-                    }
-                    #endif
+                for(const filesystem::path& path : selectedFiles) {
+                    arguments << QString::fromStdString(path.filename().string());
                 }
+
+                QString workingDir = QString::fromStdString(m_core.GetState().GetCurrentPath().string());
+
+                bool isStarted = QProcess::startDetached("zip", arguments, workingDir);
+
+                #ifdef LOG_APP_CORE
+                if(isStarted) {
+                    qDebug() << "Архивация запущена:" << arguments.join(" ");
+                } else {
+                    qDebug() << "Ошибка запуска";
+                }
+                #endif
             }
+
         });
 
 
-        QAction *deleteAction = menu->addAction("Удалить");
-        connect(deleteAction, &QAction::triggered, this, [this](){
-            m_core.OnDeleteRequest(); 
-            updateView(m_core.GetState());
-            
-            
-        });
+        menu->addAction(m_deleteAction);
 
         menu->addSeparator();
         
@@ -270,40 +299,8 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
         QAction *createFolder = menu->addAction("Создать папку");
         connect(createFolder, &QAction::triggered, this, [this](){
-            
-            QDialog dialog(this);
-            
-            dialog.setWindowFlags(Qt::FramelessWindowHint | Qt::Popup);          //Qt::FramelessWindowHint полностью удаляет стандартную рамку ОС, Qt::Popup превращает окно во всплывающее
-            
-            dialog.setAttribute(Qt::WA_TranslucentBackground); //делает фон окна полностью прозрачным
-
-
-            QVBoxLayout layout(&dialog);
-            layout.setContentsMargins(0, 0, 0, 0);
-            layout.setSpacing(0);
-
-            QLineEdit nameEdit;
-            nameEdit.setText("New Folder");
-            nameEdit.selectAll(); 
-            nameEdit.setFrame(false);
-            
-            nameEdit.setProperty("class", "foldername");
-            
-            layout.addWidget(&nameEdit);
-
-            connect(&nameEdit, &QLineEdit::returnPressed, &dialog, &QDialog::accept);
-
-            dialog.setFixedWidth(200); 
-            
-            dialog.move(QCursor::pos() - QPoint(10, 15));
-
-            if (dialog.exec() == QDialog::Accepted) {
-                QString newName = nameEdit.text();
-                if (!newName.isEmpty()) {
-                    m_core.CreateFolder(newName.toStdString());
-                    updateView(m_core.GetState());
-                }
-            }
+            m_core.CreateFolder(QLineEditAction("New Folder").toStdString());
+            updateView(m_core.GetState());
         });
 
 
@@ -311,11 +308,8 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
         menu->addSeparator();
         
-        QAction* paste = menu->addAction("Вставить");
-        connect(paste, &QAction::triggered, this, [this](){
-            m_core.OnPasteRequest();
-            updateView(m_core.GetState());
-        });
+        menu->addAction(m_pasteAction); 
+        menu->addAction(m_secectAll);
 
         menu->addSeparator();
 
@@ -340,6 +334,27 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
                 qDebug() << "Терминал запущен в" << workingDir;
             }
             #endif
+        });
+
+
+        QAction* createTXT = menu->addAction("Создать текстовый документ");
+        connect(createTXT, &QAction::triggered, this, [this](){
+            // QString workingDir = QString::fromStdWString(m_core.GetState().GetCurrentPath().wstring());
+
+            // bool success = QProcess::startDetached(">>", {QLineEditAction("newFile.txt")}, workingDir);
+
+            filesystem::path path = m_core.GetState().GetCurrentPath() / QLineEditAction("newFile.txt").toStdString();
+            ofstream file(path);
+            if(file.is_open())
+            {
+                file.close();
+                #ifdef LOG_ENABLED
+                cout<<"Файл успешно создан: "<<path<<'\n';
+                #endif
+            }
+
+            // m_core.CreateFile("newFile.txt");
+            updateView(m_core.GetState());
         });
 
         menu->addSeparator();

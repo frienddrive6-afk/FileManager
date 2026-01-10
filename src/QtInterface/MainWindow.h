@@ -15,6 +15,7 @@ class QPushButton;
 class QLineEdit;
 class FileListModel;
 class QStandardItemModel;
+class QAction;
 
 
 
@@ -31,6 +32,11 @@ class QStandardItemModel;
 ///@param m_addressBar адресная строка
 ///@param m_fileView элемент где будут отображатся все файлы
 ///@param m_model модель списка файлов
+///@param m_sideBarModel модель списка папок
+///@param m_copyAction действие копирования ctrl + c
+///@param m_cutAction действие вырезания ctrl + x
+///@param m_pasteAction действие вставки ctrl + v
+///@param m_deleteAction действие удаления del
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -58,10 +64,23 @@ private:
     FileListModel* m_model;
     QStandardItemModel* m_sideBarModel;
 
+    QAction* m_copyAction;
+    QAction* m_cutAction;
+    QAction* m_pasteAction;
+    QAction* m_deleteAction;
+    QAction* m_secectAll;
 
+
+    /// @brief установка интерфейса
     void setUI();
 
+    /// @brief установка стилей
     void setStyleSheetsForMainWindow();
+
+    /// @brief установка действий
+    void setupActions();
+
+    QString QLineEditAction(QString text);
 
     private slots:
 
