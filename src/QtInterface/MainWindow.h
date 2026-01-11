@@ -70,6 +70,8 @@ private:
     QAction* m_deleteAction;
     QAction* m_secectAll;
 
+    bool m_showHiddenFiles; // true - показывать все, false - скрывать файлы
+
 
     /// @brief установка интерфейса
     void setUI();

@@ -15,5 +15,6 @@
     <file>res/archivse.svg</file>
     <file>res/star_no_active.svg</file>
     <file>res/star_active.svg</file>
+    <file>res/3_lines.svg</file>
   </qresource>
 </RCC>

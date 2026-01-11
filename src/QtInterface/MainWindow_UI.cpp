@@ -12,6 +12,7 @@
 #include <QAction>
 #include <QDir>
 #include <QStandardPaths>
+#include <QMenu>
 
 
 
@@ -49,6 +50,60 @@ void MainWindow::setUI()
 
 
     // ЛЕВАЯ ЧАСТЬ (Сайдбар)
+    QWidget* leftSide = new QWidget(this);
+
+    QVBoxLayout* sideBarLayout = new QVBoxLayout();
+    sideBarLayout->setContentsMargins(0, 0, 0, 0);
+    sideBarLayout->setSpacing(0);
+    leftSide->setLayout(sideBarLayout);
+
+
+    // Панель опций НАЧАЛО    ==========================================================
+    QWidget* optionsContainer = new QWidget();
+    optionsContainer->setObjectName("optionsPanel"); // имя для QSS
+    optionsContainer->setAttribute(Qt::WA_StyledBackground, true);
+    optionsContainer->setFixedHeight(30);
+
+    QHBoxLayout* optionsLayout = new QHBoxLayout(optionsContainer);
+    sideBarLayout->addLayout(optionsLayout);
+
+    optionsLayout->setContentsMargins(0, 0, 0, 0);
+    optionsLayout->setSpacing(0);
+    optionsLayout->addStretch(1);
+
+    sideBarLayout->addWidget(optionsContainer);
+
+    QPushButton* menuBtn = new QPushButton();
+    menuBtn->setIcon(QIcon(":/res/3_lines.svg"));
+    menuBtn->setFixedWidth(50);
+    menuBtn->setStyleSheet("background-color: transparent;");
+    menuBtn->setFlat(true);
+    optionsLayout->addWidget(menuBtn);
+
+    QMenu* settingsMenu = new QMenu(this);
+
+    menuBtn->setMenu(settingsMenu);
+
+    QAction* showHiddenAction = new QAction("Показать скрытые файлы", this);
+    showHiddenAction->setCheckable(true);
+    showHiddenAction->setChecked(m_showHiddenFiles);
+
+    connect(showHiddenAction, &QAction::toggled, this, [this](bool checked) {
+        
+        m_showHiddenFiles = checked;
+
+        updateView(m_core.GetState());
+    });
+
+    settingsMenu->addAction(showHiddenAction);
+
+    settingsMenu->addSeparator();
+
+
+    //панель опций КОНЕЦ      ==========================================================
+
+
+
     m_sideBar = new QListView(); 
     m_sideBar->setFrameShape(QFrame::NoFrame); // Убираем наружную рамку
     m_sideBar->setViewMode(QListView::ListMode); 
@@ -56,7 +111,11 @@ void MainWindow::setUI()
     m_sideBar->setSpacing(5);                    
     m_sideBar->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    m_splitter->addWidget(m_sideBar);
+    sideBarLayout->addWidget(m_sideBar);
+
+    // m_splitter->addWidget(m_sideBar);
+    m_splitter->addWidget(leftSide);
+    
 
     m_sideBarModel = new QStandardItemModel(this);
 
@@ -244,6 +303,12 @@ void MainWindow::setStyleSheetsForMainWindow()
         "QMenu { background-color: white; border: 1px solid gray; }"
         "QMenu::item { padding: 5px 20px; }"
         "QMenu::item:selected { background-color: #0078d7; color: white; }"
+
+        "QWidget#optionsPanel {"
+        "    background-color: #ffffff;"
+        "    border-bottom: 1px solid #d0d0d0;"
+        "}"
+
     );
 
 }

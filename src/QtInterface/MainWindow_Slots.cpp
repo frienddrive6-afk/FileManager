@@ -280,7 +280,31 @@ void MainWindow::updateView(const NavigationState& state)
 
     if(m_model)
     {
-        m_model->updateData(state.GetCurrentFiles());
+
+        std::vector<FileEntry> allFiles = state.GetCurrentFiles();
+
+        if(!m_showHiddenFiles)
+        {
+            std::vector<FileEntry> filteredFiles;
+
+            filteredFiles.reserve(allFiles.size());         //бронирует память в куче
+
+            for(const FileEntry& file : allFiles)
+            {
+                if(file.GetName().size() > 0 && file.GetName()[0] != '.')
+                {
+                    filteredFiles.push_back(file);
+                }
+            }
+
+            m_model->updateData(filteredFiles);
+        }else
+        {
+            m_model->updateData(allFiles);
+        }
+
+
+        
     }
 
 }

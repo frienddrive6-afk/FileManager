@@ -10,6 +10,8 @@ MainWindow::MainWindow(AppCore& core,QWidget* parent) :
     QMainWindow(parent),
     m_core(core)
 {
+    m_showHiddenFiles = false;
+
     setUI();
     setupActions();
 
