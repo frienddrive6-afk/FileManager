@@ -292,7 +292,13 @@ string FileSystemManager::FormatTime(filesystem::file_time_type ftime)
     
     std::tm* gmt = std::localtime(&tt);
     std::stringstream ss;
-    ss.imbue(std::locale("ru_RU.UTF-8"));
+    
+     try {
+        ss.imbue(std::locale("")); 
+    }
+    catch (...) {
+        ss.imbue(std::locale::classic());
+    }
     
     // Формат: %e (день), %B (полный месяц), %Y (год), %H:%M:%S (время)
     ss << std::put_time(gmt, "%e %B %Y %H:%M:%S");

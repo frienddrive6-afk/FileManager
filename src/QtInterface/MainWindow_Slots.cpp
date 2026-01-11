@@ -28,11 +28,20 @@ void MainWindow::onBackClicked()
     m_core.GoUp();
 }
 
+
+
+
+
 void MainWindow::onAddressReturnPressed()
 {
     std::string pathStr = m_addressBar->text().toStdString();
     m_core.Navigate(pathStr);
 }
+
+
+
+
+
 
 void MainWindow::onFileDoubleClicked(const QModelIndex& index)
 {
@@ -53,6 +62,10 @@ void MainWindow::onFileDoubleClicked(const QModelIndex& index)
 }
 
 
+
+
+
+
 void MainWindow::goToDirectory(const QModelIndex& index)
 {
     QString path = index.data(Qt::UserRole).toString();
@@ -63,6 +76,10 @@ void MainWindow::goToDirectory(const QModelIndex& index)
     }
 
 }
+
+
+
+
 
 
 void MainWindow::onSelectionChanged()
@@ -87,6 +104,11 @@ void MainWindow::onSelectionChanged()
     }
     #endif
 }
+
+
+
+
+
 
 
 
@@ -247,6 +269,11 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 }
 
 
+
+
+
+
+
 void MainWindow::updateView(const NavigationState& state)
 {
     m_addressBar->setText(QString::fromStdString(state.GetCurrentPath().string()));
@@ -257,6 +284,11 @@ void MainWindow::updateView(const NavigationState& state)
     }
 
 }
+
+
+
+
+
 
 
 QString MainWindow::getUserInput(QString defaultText)
@@ -298,6 +330,8 @@ QString MainWindow::getUserInput(QString defaultText)
     return QString{};
 
 }
+
+
 
 
 
