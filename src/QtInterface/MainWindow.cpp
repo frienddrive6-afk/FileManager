@@ -11,6 +11,7 @@ MainWindow::MainWindow(AppCore& core,QWidget* parent) :
     m_core(core)
 {
     m_showHiddenFiles = false;
+    m_currentIconSize = 100;
 
     setUI();
     setupActions();

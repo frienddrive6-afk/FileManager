@@ -13,6 +13,8 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QMenu>
+#include <QLabel>
+#include <QWidgetAction>
 
 
 
@@ -92,6 +94,10 @@ void MainWindow::setUI()
         
         m_showHiddenFiles = checked;
 
+        #ifdef LOG_APP_CORE
+        cout << "Показать скрытые файлы: " << m_showHiddenFiles << endl;
+        #endif
+
         updateView(m_core.GetState());
     });
 
@@ -99,6 +105,53 @@ void MainWindow::setUI()
 
     settingsMenu->addSeparator();
 
+
+    QWidget* zoomWidget = new QWidget();
+    zoomWidget->setObjectName("zoomWidget");
+    // Стиль для кнопок зума (круглые или квадратные, серые)
+    // zoomWidget->setStyleSheet(
+    //     "QPushButton { "
+    //     "   background-color: #f0f0f0; border: 1px solid #dcdcdc; border-radius: 4px; "
+    //     "   min-width: 30px; max-width: 30px; min-height: 25px; max-height: 25px;"
+    //     "   font-weight: bold;"
+    //     "}"
+    //     "QPushButton:hover { background-color: #e0e0e0; }"
+    //     "QPushButton:pressed { background-color: #d0d0d0; }"
+    //     "QLabel { font-size: 14px; color: black; border: none; background: transparent; }"
+    // );
+
+    QHBoxLayout* zoomLayout = new QHBoxLayout(zoomWidget);
+    zoomLayout->setContentsMargins(0, 0, 0, 0);
+    zoomLayout->setSpacing(2);
+
+    QLabel* zoomLabel = new QLabel("Размер значьков: ");
+    zoomLabel->setObjectName("zoomLabel");
+
+    QPushButton* btnMinus = new QPushButton("-");
+    btnMinus->setObjectName("zoomBtn");
+
+    QPushButton* btnPlus = new QPushButton("+");
+    btnPlus->setObjectName("zoomBtn");
+
+    zoomLayout->addWidget(zoomLabel);
+    zoomLayout->addStretch();
+    zoomLayout->addWidget(btnMinus);
+    zoomLayout->addWidget(btnPlus);
+
+    connect(btnMinus, &QPushButton::clicked, this, [this](){
+        changeIconSize(-20);
+
+    });
+
+    connect(btnPlus, &QPushButton::clicked, this, [this](){
+        changeIconSize(20);
+    });
+
+    QWidgetAction* zoomAction = new QWidgetAction(settingsMenu);
+    zoomAction->setDefaultWidget(zoomWidget);
+
+    settingsMenu->addAction(zoomAction);
+    settingsMenu->addSeparator();
 
     //панель опций КОНЕЦ      ==========================================================
 
@@ -307,6 +360,34 @@ void MainWindow::setStyleSheetsForMainWindow()
         "QWidget#optionsPanel {"
         "    background-color: #ffffff;"
         "    border-bottom: 1px solid #d0d0d0;"
+        "}"
+
+
+        "QWidget#zoomWidget {"
+        "    background: transparent;"
+        "}"
+
+        // 2. Кнопки зума (обращаемся по имени #zoomBtn)
+        "QPushButton#zoomBtn {"
+        "    background-color: #f0f0f0;"
+        "    border: 1px solid #dcdcdc;"
+        "    border-radius: 4px;"
+        "    min-width: 30px; max-width: 30px;"
+        "    min-height: 25px; max-height: 25px;"
+        "    font-weight: bold;"
+        "    color: #333333;"
+        "}"
+        
+        // Эффекты при наведении и нажатии
+        "QPushButton#zoomBtn:hover { background-color: #e0e0e0; }"
+        "QPushButton#zoomBtn:pressed { background-color: #d0d0d0; }"
+
+        // 3. Текст "Размер значков"
+        "QLabel#zoomLabel {"
+        "    font-size: 14px;"
+        "    color: black;"
+        "    background: transparent;"
+        "    border: none;"
         "}"
 
     );

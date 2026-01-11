@@ -37,6 +37,9 @@ class QAction;
 ///@param m_cutAction действие вырезания ctrl + x
 ///@param m_pasteAction действие вставки ctrl + v
 ///@param m_deleteAction действие удаления del
+///@param m_secectAll действие выделить все ctrl + a
+///@param m_showHiddenFiles true - показывать все, false - скрывать файлы
+///@param m_currentIconSize текущий размер иконок по умолчанию 100
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -70,7 +73,8 @@ private:
     QAction* m_deleteAction;
     QAction* m_secectAll;
 
-    bool m_showHiddenFiles; // true - показывать все, false - скрывать файлы
+    bool m_showHiddenFiles;
+    int m_currentIconSize; 
 
 
     /// @brief установка интерфейса
@@ -91,6 +95,10 @@ private:
     /// @param slot функция которая будет вызываться при нажатии
     /// @return созданный QAction
     QAction* createAction(QString text, QKeySequence shortcut, std::function<void()> slot);
+
+    /// @brief изменяет размер иконок
+    /// @param delta прибавление или отнимание 
+    void changeIconSize(int delta);
 
     private slots:
 

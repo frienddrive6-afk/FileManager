@@ -500,3 +500,42 @@ void MainWindow::showPropertiesDialog(const std::string& path)
     
     dialog.exec();  //показать
 }
+
+
+void MainWindow::changeIconSize(int size)
+{
+    int newSize = m_currentIconSize + size;
+
+    if(newSize < 80)
+    {
+        newSize = 80;
+    }
+    if(newSize > 200)
+    {
+        newSize = 200;
+    }
+
+    if(newSize != m_currentIconSize)
+    {
+        m_currentIconSize = newSize;
+
+        #ifdef LOG_ENABLED
+        cout << "Изменение размера иконок: " << m_currentIconSize << endl;
+        #endif
+
+        m_fileView->setGridSize(QSize(m_currentIconSize, m_currentIconSize));
+
+        m_fileView->setIconSize(QSize(m_currentIconSize - 20, m_currentIconSize - 40));
+
+        QFont font = m_fileView->font();
+        
+        int fontSize = 9 + (m_currentIconSize - 50) / 20;
+
+        if (fontSize > 16) fontSize = 16; 
+
+        font.setPointSize(fontSize);
+        m_fileView->setFont(font);
+
+    }
+
+}
