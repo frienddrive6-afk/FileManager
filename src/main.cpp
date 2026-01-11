@@ -16,6 +16,7 @@
 // #include <chrono> 
 // #include <random>
 
+
 #include "main.h"
 #include "FileEntry.h"
 #include "FileSystemManager.h"
@@ -26,6 +27,7 @@
 
 //Qt
 #include <QApplication>
+#include <QMetaObject>
 #include "QtInterface/MainWindow.h"
 
 using namespace std;
@@ -51,7 +53,7 @@ void consoleMode()
 int main(int argc, char *argv[])
 {   
     //Вход в консольный режим без Qt
-    if (argc > 1 && string(argv[1]) == "-console") {
+    if (argc > 1 && string(argv[1]) == "--console" || argc > 1 && string(argv[1]) == "-c") {
         consoleMode(); 
         return 0;
     }
@@ -65,7 +67,10 @@ int main(int argc, char *argv[])
 
     core.OnStateChanged = [&](const NavigationState& state)
     {
-        window.updateView(state);
+        QMetaObject::invokeMethod(&window, [&window, state](){
+            window.updateView(state);
+        }, Qt::QueuedConnection);
+        
     };
 
     core.Init(); 

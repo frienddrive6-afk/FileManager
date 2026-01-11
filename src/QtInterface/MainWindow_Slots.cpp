@@ -381,7 +381,7 @@ void MainWindow::showPropertiesDialog(const std::string& path)
     QHBoxLayout* headerLayout = new QHBoxLayout();
     
     QPushButton* starBtn = new QPushButton();
-    starBtn->setIcon(QIcon(":/res/star.svg")); 
+    starBtn->setIcon(QIcon(":/res/star_no_active.svg")); 
     starBtn->setToolTip("Добавить в избранное");
     
     QPushButton* closeBtn = new QPushButton();

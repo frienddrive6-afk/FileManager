@@ -13,5 +13,7 @@
     <file>res/back.svg</file>
     <file>res/audios.svg</file>
     <file>res/archivse.svg</file>
+    <file>res/star_no_active.svg</file>
+    <file>res/star_active.svg</file>
   </qresource>
 </RCC>

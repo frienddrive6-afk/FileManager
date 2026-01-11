@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="2048px" height="2048px" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 2048 2048">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .star-filled {
+        fill: #757575; 
+        stroke: #757575; 
+        stroke-width: 40;
+        stroke-linejoin: round;
+    }
+   ]]>
+  </style>
+ </defs>
+ <g id="Star_Active">
+  <path class="star-filled" d="M1024 198l274 565 626 91 -453 441 107 623 -554 -296 -554 296 107 -623 -453 -441 626 -91 274 -565z"/>
+ </g>
+</svg>

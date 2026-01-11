@@ -208,8 +208,7 @@ void MainWindow::setupActions()
 
     //ВЫДЕЛИТЬ ВСЕ (Ctrl + A)
     m_secectAll = createAction("Выделить все", QKeySequence::SelectAll, [this](){
-        m_core.OnSelectAllRequest();
-        updateView(m_core.GetState());
+        m_fileView->selectAll();
     });
 
 }

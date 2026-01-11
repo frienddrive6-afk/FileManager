@@ -3,20 +3,25 @@
 #include "NavigationState.h"
 #include "FileSystemManager.h"
 #include "IRenderer.h"
+#include "DirectoryWatcher.h"
+
 #include <functional>
 
 
 /// @brief класс основной логики программы
 ///@param state состояние навигации в файловой системе
 ///@param OnStateChanged функция которая будет вызываться при изменении состояния
+///@param m_watcher мониторинг изменений
 class AppCore
 {
 private:
     NavigationState state;
+    DirectoryWatcher m_watcher;
     // IRenderer* render;
     
 
 public:
+    /// @brief функция которая будет вызываться при изменении состояния
     std::function<void(const NavigationState&)> OnStateChanged;
 
 

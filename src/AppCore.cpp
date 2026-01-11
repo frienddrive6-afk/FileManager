@@ -12,6 +12,20 @@ using namespace std;
 AppCore::AppCore() 
 {
 
+    m_watcher.SetCallback([this](){
+
+        vector<FileEntry> files = FileSystemManager::LoadDirectory(state.GetCurrentPath());
+
+        state.Refresh(files);
+
+        if(OnStateChanged)
+        {
+            OnStateChanged(state);
+        }
+
+    });
+
+
 }
 
 AppCore::~AppCore() 
@@ -33,6 +47,8 @@ void AppCore::Navigate(const filesystem::path& path)
 {
     state.SetPath(path);
     state.Refresh(FileSystemManager::LoadDirectory(path));
+
+    m_watcher.Start(path.string());
 
     if (OnStateChanged) {
         OnStateChanged(state);
@@ -87,13 +103,21 @@ void AppCore::ExecuteFile(int index)
 
 void AppCore::OnDeleteRequest()
 {
+    std::vector<filesystem::path> pathsToDelete;
+
     for(const FileEntry& entry : state.GetCurrentFiles())
     {
         if(entry.IsSelected())
         {
-            FileSystemManager::DeletePath(entry.GetPath());
+            pathsToDelete.push_back(entry.GetPath());
         }
     }
+
+    for(const auto& path : pathsToDelete)
+    {
+        FileSystemManager::DeletePath(path);
+    }
+
     Navigate(state.GetCurrentPath());
 }
 
