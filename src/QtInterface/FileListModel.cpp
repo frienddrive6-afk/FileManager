@@ -17,6 +17,12 @@ void FileListModel::updateData(const std::vector<FileEntry>& newFiles)
     endResetModel();
 }
 
+const FileEntry& FileListModel::getFile(int row) const 
+{
+    return m_files[row];
+}
+
+
 int FileListModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())

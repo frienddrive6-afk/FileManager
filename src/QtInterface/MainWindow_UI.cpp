@@ -108,17 +108,7 @@ void MainWindow::setUI()
 
     QWidget* zoomWidget = new QWidget();
     zoomWidget->setObjectName("zoomWidget");
-    // Стиль для кнопок зума (круглые или квадратные, серые)
-    // zoomWidget->setStyleSheet(
-    //     "QPushButton { "
-    //     "   background-color: #f0f0f0; border: 1px solid #dcdcdc; border-radius: 4px; "
-    //     "   min-width: 30px; max-width: 30px; min-height: 25px; max-height: 25px;"
-    //     "   font-weight: bold;"
-    //     "}"
-    //     "QPushButton:hover { background-color: #e0e0e0; }"
-    //     "QPushButton:pressed { background-color: #d0d0d0; }"
-    //     "QLabel { font-size: 14px; color: black; border: none; background: transparent; }"
-    // );
+
 
     QHBoxLayout* zoomLayout = new QHBoxLayout(zoomWidget);
     zoomLayout->setContentsMargins(0, 0, 0, 0);

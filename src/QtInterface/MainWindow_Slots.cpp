@@ -45,15 +45,23 @@ void MainWindow::onAddressReturnPressed()
 
 void MainWindow::onFileDoubleClicked(const QModelIndex& index)
 {
-    if(m_core.GetState().GetCurrentFiles()[index.row()].IsDirectory())
+    int coreIndex = getCoreIndex(index.row());
+    if(coreIndex == -1)
     {
-        m_core.EnterDirectory(index.row());
-    }else if(m_core.GetState().GetCurrentFiles()[index.row()].GetPath().extension() == ".txt")
+        return;
+    }
+
+    const FileEntry& file = m_core.GetState().GetCurrentFiles()[coreIndex];
+
+    if(file.IsDirectory())
     {
-        m_core.ExecuteFile(index.row());
+        m_core.EnterDirectory(coreIndex);
+    }else if(file.GetPath().extension() == ".txt")
+    {
+        m_core.ExecuteFile(coreIndex);
     }else
     {
-        QString qPath = QString::fromStdString(m_core.GetState().GetCurrentFiles()[index.row()].GetPath().string());
+        QString qPath = QString::fromStdString(file.GetPath().string());
         
         QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
     
@@ -90,7 +98,11 @@ void MainWindow::onSelectionChanged()
     std::vector<int> backendIndices;
 
     for (const QModelIndex& index : qtSelection) {
-        backendIndices.push_back(index.row());
+        int coreIndex = getCoreIndex(index.row());
+        
+        if (coreIndex != -1) {
+            backendIndices.push_back(coreIndex);
+        }
     }
 
     m_core.SetSelection(backendIndices);
@@ -100,7 +112,7 @@ void MainWindow::onSelectionChanged()
     
     for(string str : m_core.whoIsSelacted())
     {
-        qDebug() << QString::fromStdString(str + "is Selected" );
+        qDebug() << QString::fromStdString(str + " is Selected" );
     }
     #endif
 }
@@ -124,9 +136,12 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
         
         QAction *openAction = menu->addAction("Открыть");
         connect(openAction, &QAction::triggered, this, [this, index](){
-            m_core.EnterDirectory(index.row());
+            int coreIndex = getCoreIndex(index.row());
+            if (coreIndex != -1) {
+                m_core.EnterDirectory(coreIndex);
+            }
             #ifdef LOG_APP_CORE
-                qDebug() << "Открыть" << QString::fromStdString(m_core.getNameOnIndex(index.row())) <<'\n';
+                qDebug() << "Открыть" << QString::fromStdString(m_core.getNameOnIndex(coreIndex)) <<'\n';
 
             #endif
         });
@@ -141,7 +156,8 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
         QAction* renameFile = menu->addAction("Переименовать");
         connect(renameFile, &QAction::triggered, this, [this, index](){
-            m_core.OnRenameRequest(getUserInput(QString::fromStdString(m_core.getNameOnIndex(index.row()))).toStdString()); 
+            int coreIndex = getCoreIndex(index.row());
+            m_core.OnRenameRequest(getUserInput(QString::fromStdString(m_core.getNameOnIndex(coreIndex))).toStdString()); 
             updateView(m_core.GetState());
         });
         
@@ -538,4 +554,32 @@ void MainWindow::changeIconSize(int size)
 
     }
 
+}
+
+int MainWindow::getCoreIndex(int uiIndex)
+{
+    if(!m_model)
+    {
+        return -1;
+    }
+
+    if(uiIndex < 0 || uiIndex >= m_model->rowCount())
+    {
+        return -1;
+    }
+
+    const FileEntry& visibleFile = m_model->getFile(uiIndex);
+    string visiblePath = visibleFile.GetPath().string();
+
+    const vector<FileEntry>& allFiles = m_core.GetState().GetCurrentFiles();
+
+    for(long long i = 0; i < allFiles.size();++i)
+    {
+        if(allFiles[i].GetPath().string() == visiblePath)
+        {
+            return static_cast<int>(i);
+        }
+    }
+
+    return -1;
 }

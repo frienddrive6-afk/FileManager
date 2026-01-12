@@ -100,6 +100,8 @@ private:
     /// @param delta прибавление или отнимание 
     void changeIconSize(int delta);
 
+    int getCoreIndex(int uiIndex);
+
     private slots:
 
         /// @brief обработчик нажатия кнопки назад в родительскую директорию

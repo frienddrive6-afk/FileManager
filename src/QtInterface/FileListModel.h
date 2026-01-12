@@ -24,6 +24,10 @@ public:
     /// @param newFiles массив FileEntry с новыми данными
     void updateData(const std::vector<FileEntry>& newFiles);
 
+    /// @brief возвращает FileEntry по индексу
+    /// @param row индекс
+    const FileEntry& getFile(int row) const;
+
     // --- переопределенные методы ---
     
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
