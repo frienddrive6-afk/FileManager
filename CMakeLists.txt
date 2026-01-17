@@ -11,21 +11,29 @@ set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+
+set(MY_LOCAL_QT "$ENV{HOME}/Qt/6.8.0/gcc_64")
+
+if(EXISTS "${MY_LOCAL_QT}")
+    message(STATUS "Найден локальный Qt 6.8: ${MY_LOCAL_QT}")
+    list(PREPEND CMAKE_PREFIX_PATH "${MY_LOCAL_QT}")
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
+
 
 include_directories(src)
 include_directories(src/QtInterface)
 
 add_executable(filemanager
     src/main.cpp
-    
     src/resources.qrc
-
+    
     src/AppCore.cpp
     src/FileSystemManager.cpp
     src/NavigationState.cpp
     src/FileEntry.cpp
-    src/ConsoleRender.cpp
+    src/ConsoleRender.cpp 
 
     src/QtInterface/MainWindow.h
     src/QtInterface/MainWindow.cpp

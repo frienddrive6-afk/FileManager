@@ -1,6 +1,8 @@
 #include "FileListModel.h"
 #include <filesystem>
 #include <QDebug>
+#include <QGuiApplication>
+#include <QPalette>
 
 FileListModel::FileListModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -69,55 +71,29 @@ QVariant FileListModel::data(const QModelIndex &index, int role) const
 
 void FileListModel::setupIcons()
 {
-    // Загружаем картинки 
-    m_folderIcon = QIcon(":/res/folder.svg");
-    m_fileIcon = QIcon(":/res/file.svg");
+    m_iconCache.clear();
 
-    QIcon iconArchive(":/res/archivse.svg");
-    QIcon iconVideo(":/res/videos.svg");
-    QIcon iconAudio(":/res/audios.svg");
-    QIcon iconImage(":/res/images.svg");
-    QIcon iconPdf(":/res/pdf.svg");
-    QIcon iconTxt(":/res/txt.svg");
-    QIcon iconWeb(":/res/web_txt.svg");
+    QStringList extensions = {
+        ".mp4", ".avi", ".mkv", ".mov",
+        ".mp3", ".wav", ".ogg",
+        ".jpg", ".jpeg", ".png", ".bmp", ".svg",
+        ".txt", ".md", ".pdf",
+        ".html", ".css", ".js", ".json",
+        ".zip", ".rar", ".7z", ".tar", ".gz"
+    };
 
-    // Заполняем словарь
- 
-    // Видео
-    m_iconCache[".mp4"] = iconVideo;
-    m_iconCache[".avi"] = iconVideo;
-    m_iconCache[".mkv"] = iconVideo;
-    m_iconCache[".mov"] = iconVideo;
+    for (const QString& ext : extensions) {
+        std::string dummyName = "dummy" + ext.toStdString();
+        
+        QString iconPath = getIconPath(dummyName, false); // false = это не папка
+        
+        m_iconCache[ext] = QIcon(iconPath);
+    }
 
-    // Аудио
-    m_iconCache[".mp3"] = iconAudio;
-    m_iconCache[".wav"] = iconAudio;
-    m_iconCache[".ogg"] = iconAudio;
+    m_folderIcon = QIcon(getIconPath("", true)); 
+    
+    m_fileIcon = QIcon(getIconPath("file.unknown_extension", false));
 
-    // Картинки
-    m_iconCache[".jpg"] = iconImage;
-    m_iconCache[".jpeg"] = iconImage;
-    m_iconCache[".png"] = iconImage;
-    m_iconCache[".bmp"] = iconImage;
-    m_iconCache[".svg"] = iconImage;
-
-    // Текст и документы
-    m_iconCache[".txt"] = iconTxt;
-    m_iconCache[".md"]  = iconTxt;
-    m_iconCache[".pdf"] = iconPdf;
-
-    // Веб
-    m_iconCache[".html"] = iconWeb;
-    m_iconCache[".css"]  = iconWeb;
-    m_iconCache[".js"]   = iconWeb;
-    m_iconCache[".json"] = iconWeb;
-
-    // Архивы
-    m_iconCache[".zip"] = iconArchive;
-    m_iconCache[".rar"] = iconArchive;
-    m_iconCache[".7z"]  = iconArchive;
-    m_iconCache[".tar"] = iconArchive;
-    m_iconCache[".gz"]  = iconArchive;
 }
 
 
@@ -136,10 +112,52 @@ QIcon FileListModel::getIconForFile(const FileEntry& file) const
     }
 
     #ifdef LOG_ENABLED
-    // cout<< file.GetPath().extension().string() <<endl;
     qDebug() << QString::fromStdString(file.GetPath().extension().string()) <<"\n";
     #endif
     
     // Если не нашли иконку - возвращаем дефолтную
     return m_fileIcon; 
+}
+
+
+
+
+QString FileListModel::getIconPath(const std::string& filename, bool isDir)
+{
+    QColor textColor = QGuiApplication::palette().color(QPalette::WindowText);
+    bool isDark = textColor.lightness() > 128;
+
+    if (isDir) {
+        return ":/res/folder.svg";
+    }
+
+    std::filesystem::path path(filename);
+    QString ext = QString::fromStdString(path.extension().string()).toLower();
+
+    if (isDark) {// Темная тема
+        if (ext == ".zip" || ext == ".rar" || ext == ".7z" || ext == ".tar" || ext == ".gz") return ":/res/archivse_dark.svg";
+        if (ext == ".mp3" || ext == ".wav" || ext == ".ogg") return ":/res/audios_dark.svg";
+        if (ext == ".txt" || ext == ".md") return ":/res/txt_dark.svg";
+        if (ext == ".mp4" || ext == ".avi" || ext == ".mkv" || ext == ".mov") return ":/res/videos_dark.svg";
+        if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".bmp" || ext == ".svg") return ":/res/images_dark.svg";
+        if (ext == ".pdf") return ":/res/pdf_dark.svg";
+        if (ext == ".html" || ext == ".css" || ext == ".js" || ext == ".json") return ":/res/web_txt_dark.svg";
+        return ":/res/file_dark.svg";
+    } 
+    else {// Светлая тема
+        if (ext == ".zip" || ext == ".rar" || ext == ".7z" || ext == ".tar" || ext == ".gz") return ":/res/archivse.svg";
+        if (ext == ".mp3" || ext == ".wav" || ext == ".ogg") return ":/res/audios.svg";
+        if (ext == ".txt" || ext == ".md") return ":/res/txt.svg";
+        if (ext == ".mp4" || ext == ".avi" || ext == ".mkv" || ext == ".mov") return ":/res/videos.svg";
+        if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".bmp" || ext == ".svg") return ":/res/images.svg";
+        if (ext == ".pdf") return ":/res/pdf.svg";
+        if (ext == ".html" || ext == ".css" || ext == ".js" || ext == ".json") return ":/res/web_txt.svg";
+        return ":/res/file.svg";
+    }
+}
+
+
+void FileListModel::refresh()
+{
+    emit layoutChanged();
 }

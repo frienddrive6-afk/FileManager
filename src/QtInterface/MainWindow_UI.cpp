@@ -15,12 +15,16 @@
 #include <QMenu>
 #include <QLabel>
 #include <QWidgetAction>
+#include <QStyleHints>
+#include <QGuiApplication>
+#include <QEvent>
 
 
 
 void MainWindow::setUI()
 {
     setStyleSheetsForMainWindow();
+    updateIcons();
 
     setWindowTitle("FileManager");
     resize(1080, 550);
@@ -67,7 +71,7 @@ void MainWindow::setUI()
     optionsContainer->setFixedHeight(30);
 
     QHBoxLayout* optionsLayout = new QHBoxLayout(optionsContainer);
-    sideBarLayout->addLayout(optionsLayout);
+    // sideBarLayout->addLayout(optionsLayout);
 
     optionsLayout->setContentsMargins(0, 0, 0, 0);
     optionsLayout->setSpacing(0);
@@ -75,16 +79,16 @@ void MainWindow::setUI()
 
     sideBarLayout->addWidget(optionsContainer);
 
-    QPushButton* menuBtn = new QPushButton();
-    menuBtn->setIcon(QIcon(":/res/3_lines.svg"));
-    menuBtn->setFixedWidth(50);
-    menuBtn->setStyleSheet("background-color: transparent;");
-    menuBtn->setFlat(true);
-    optionsLayout->addWidget(menuBtn);
+    m_menuBtn = new QPushButton();
+    m_menuBtn->setIcon(QIcon(":/res/3_lines.svg"));
+    m_menuBtn->setFixedWidth(50);
+    m_menuBtn->setStyleSheet("background-color: transparent;");
+    m_menuBtn->setFlat(true);
+    optionsLayout->addWidget(m_menuBtn);
 
     QMenu* settingsMenu = new QMenu(this);
 
-    menuBtn->setMenu(settingsMenu);
+    m_menuBtn->setMenu(settingsMenu);
 
     QAction* showHiddenAction = new QAction("Показать скрытые файлы", this);
     showHiddenAction->setCheckable(true);
@@ -204,7 +208,6 @@ void MainWindow::setUI()
 
     // ВЕРХНЯЯ ПАНЕЛЬ (Toolbar)
     QWidget* topBarContainer = new QWidget();
-    topBarContainer->setStyleSheet("background-color:  white; border-bottom: 1px solid #ddd;");
     topBarContainer->setFixedHeight(50); // Фиксированная высота
 
 
@@ -214,19 +217,20 @@ void MainWindow::setUI()
 
 
     m_backBtn = new QPushButton();
+    m_backBtn->setObjectName("navBtn");
     m_backBtn->setIcon(QIcon(":/res/back.svg"));
     m_backBtn->setFlat(true); // Плоская кнопка без рамок
     m_topBarLayout->addWidget(m_backBtn);
 
 
     m_forwardBtn = new QPushButton();
+    m_backBtn->setObjectName("navBtn");
     m_forwardBtn->setIcon(QIcon(":/res/forward.svg"));
     m_forwardBtn->setFlat(true);
     m_topBarLayout->addWidget(m_forwardBtn);
 
 
     m_addressBar = new QLineEdit();
-    m_addressBar->setStyleSheet("background: #f5f5f5; border: 1px solid #ccc; border-radius: 4px; padding: 4px;");
     m_topBarLayout->addWidget(m_addressBar);
 
 
@@ -316,70 +320,148 @@ void MainWindow::setupActions()
 }
 
 
+void MainWindow::updateIcons()
+{
+    bool dark = isSystemThemeDark();
+
+    QString suffix = dark ? "_dark.svg" : ".svg"; 
+
+    if(m_backBtn)    m_backBtn->setIcon(QIcon(":/res/back" + suffix));
+    if(m_forwardBtn) m_forwardBtn->setIcon(QIcon(":/res/forward" + suffix));
+    if(m_menuBtn)      m_menuBtn->setIcon(QIcon(":/res/3_lines" + suffix));
+    if(m_starBtn)      m_starBtn->setIcon(QIcon(":/res/star_no_active" + suffix));
+    
+
+}
 
 
 
-
+bool MainWindow::isSystemThemeDark()
+{
+    QColor textColor = QGuiApplication::palette().color(QPalette::WindowText);        //плучаем цвет текста
+    return textColor.lightness() > 128;                                               // считаем если текст белый то тема темная
+}
 
 
 void MainWindow::setStyleSheetsForMainWindow()
 {
-    this->setStyleSheet(
-        "QMainWindow { background-color: #f3f3f3; }"
-        "QLineEdit { background: white; border: 1px solid #ccc; border-radius: 4px; padding: 4px; }"
-        "QDialog {"
-                "   border: 2px solid #0078d7;"  
-                "   background-color: white;"    
-                "   border-radius: 0px;"         
-                "}"
+    bool dark = isSystemThemeDark();
 
+    
+    QString winBg       = dark ? "#1e1e1e" : "#f3f3f3"; // Фон окна
+    QString contentBg   = dark ? "#252526" : "#ffffff"; // Фон контента (Списки, Диалоги)
+    QString textMain    = dark ? "#ffffff" : "#000000"; // Цвет текста
+    QString border      = dark ? "#3e3e42" : "#cccccc"; // Рамки
+    QString accent      = dark ? "#0078d7" : "#0078d7"; // Акцент (Синий)
+    QString selectionBg = dark ? "#094771" : "#e5f3ff"; // Фон выделения
+    QString btnBg       = dark ? "#3c3c3c" : "#f0f0f0"; // Фон кнопок (Зум)
+    QString btnHover    = dark ? "#454545" : "#e0e0e0"; // Кнопки при наведении
+    QString inputBg     = dark ? "#2d2d2d" : "#ffffff"; // Фон полей ввода (Адресная строка)
+
+    
+    QString style = QString(
+        // Глобальные настройки
+        "QMainWindow { background-color: %1; color: %3; }"
+        
+        // --- ПОЛЯ ВВОДА (Адресная строка) ---
+        "QLineEdit { "
+        "    background-color: %9; color: %3; "
+        "    border: 1px solid %4; border-radius: 4px; padding: 4px; "
+        "}"
+
+        // --- СПИСКИ (Файлы и Сайдбар) ---
+        "QListView { "
+        "    background-color: %2; color: %3; "
+        "    border: none; "
+        "}"
+        "QListView::item:hover { background-color: %8; }"
+        "QListView::item:selected { background-color: %6; color: %3; }"
+
+        // --- ДИАЛОГИ И ФРЕЙМЫ ---
+        "QDialog { "
+        "   border: 2px solid %5; background-color: %2; border-radius: 0px; "
+        "}"
+        "QFrame#MainBackground { "
+        "   background-color: %1; border-radius: 12px; border: 1px solid %4; "
+        "}"
+        "QFrame#InfoCard { "
+        "   background-color: %2; border-radius: 8px; border: 1px solid %4; "
+        "}"
+
+        // --- ПОЛЕ ВВОДА ВНУТРИ ДИАЛОГА (Rename/New Folder) ---
         "QLineEdit[class = 'foldername'] { "
-        "   background: white;"        
-        "   color: black;"
-        "   padding: 5px;"
-        "   font-size: 14px;"
-        "   selection-background-color: #0078d7;"
-        "   selection-color: white;" 
+        "   background: %2; color: %3; "
+        "   padding: 5px; font-size: 14px; "
+        "   selection-background-color: %5; selection-color: white; "
         "}"
 
+        // --- КОНТЕКСТНОЕ МЕНЮ ---
+        "QMenu { "
+        "   background-color: %2; border: 1px solid %4; "
+        "}"
+        "QMenu::item { padding: 5px 20px; color: %3; }"
+        "QMenu::item:selected { background-color: %5; color: white; }"
+
+        // --- БОКОВАЯ ПАНЕЛЬ ОПЦИЙ ---
+        "QWidget#optionsPanel { "
+        "    background-color: %2; border-bottom: 1px solid %4; "
+        "}"
+
+        // --- ВИДЖЕТ ЗУМА (В МЕНЮ) ---
+        "QWidget#zoomWidget { background: transparent; }"
+        "QLabel#zoomLabel { font-size: 14px; color: %3; background: transparent; border: none; }"
+
+        "QPushButton#zoomBtn { "
+        "    background-color: %7; border: 1px solid %4; border-radius: 4px; "
+        "    min-width: 30px; max-width: 30px; min-height: 25px; max-height: 25px; "
+        "    font-weight: bold; color: %3; "
+        "}"
+        "QPushButton#zoomBtn:hover { background-color: %8; }"
+        "QPushButton#zoomBtn:pressed { background-color: %5; }"
+
+        // --- КНОПКИ НАВИГАЦИИ (< >) ---
+        "QPushButton#navBtn { "
+        "    background-color: transparent; border: none; border-radius: 4px; "
+        "}"
+        "QPushButton#navBtn:hover { background-color: %8; }"
+        "QPushButton#navBtn:pressed { background-color: %4; }"
+
+        // --- СТИЛИ ДЛЯ ДИАЛОГА СВОЙСТВ ---
         
-        "QMenu { background-color: white; border: 1px solid gray; }"
-        "QMenu::item { padding: 5px 20px; }"
-        "QMenu::item:selected { background-color: #0078d7; color: white; }"
-
-        "QWidget#optionsPanel {"
-        "    background-color: #ffffff;"
-        "    border-bottom: 1px solid #d0d0d0;"
+        "QFrame#MainBackground { "
+        "   background-color: %2;"        /* contentBg */
+        "   border-radius: 12px;"
+        "   border: 1px solid %4;"        /* border */
         "}"
 
-
-        "QWidget#zoomWidget {"
-        "    background: transparent;"
+        "QFrame#InfoCard { "
+        "   background-color: %9;"        /* inputBg */
+        "   border-radius: 8px;"
+        "   border: 1px solid %4;"        /* border */
         "}"
 
-        // 2. Кнопки зума (обращаемся по имени #zoomBtn)
-        "QPushButton#zoomBtn {"
-        "    background-color: #f0f0f0;"
-        "    border: 1px solid #dcdcdc;"
-        "    border-radius: 4px;"
-        "    min-width: 30px; max-width: 30px;"
-        "    min-height: 25px; max-height: 25px;"
-        "    font-weight: bold;"
-        "    color: #333333;"
+        "QLabel#Title { "
+        "   font-size: 18px; font-weight: bold; color: %3;" /* textMain */
         "}"
-        
-        // Эффекты при наведении и нажатии
-        "QPushButton#zoomBtn:hover { background-color: #e0e0e0; }"
-        "QPushButton#zoomBtn:pressed { background-color: #d0d0d0; }"
-
-        // 3. Текст "Размер значков"
-        "QLabel#zoomLabel {"
-        "    font-size: 14px;"
-        "    color: black;"
-        "    background: transparent;"
-        "    border: none;"
+        "QLabel#SubTitle { "
+        "   font-size: 13px; color: %3;"  /* textMain */
+        "   opacity: 0.7;"               
         "}"
 
-    );
+        "QPushButton#headerBtn { "
+        "   background-color: transparent; border: none; border-radius: 4px; padding: 4px; "
+        "}"
+        "QPushButton#headerBtn:hover { background-color: %8; }" /* btnHover */
+    )
+    .arg(winBg)      // %1
+    .arg(contentBg)  // %2
+    .arg(textMain)   // %3
+    .arg(border)     // %4
+    .arg(accent)     // %5
+    .arg(selectionBg)// %6
+    .arg(btnBg)      // %7
+    .arg(btnHover)   // %8
+    .arg(inputBg);   // %9
 
+    this->setStyleSheet(style);
 }

@@ -5,16 +5,16 @@ viewBox="0 0 2048 2048">
  <defs>
   <style type="text/css">
    <![CDATA[
-    .star-filled {
-        fill: #000000; 
-        stroke: #000000; 
-        stroke-width: 40;
-        stroke-linejoin: round;
-    }
+    .base {fill:#AB47BC} /* Lighter Purple */
+    .corner {fill:#E1BEE7}
+    .glyph {fill:#FFFFFF}
    ]]>
   </style>
  </defs>
- <g id="Star_Active">
-  <path class="star-filled" d="M1024 198l274 565 626 91 -453 441 107 623 -554 -296 -554 296 107 -623 -453 -441 626 -91 274 -565z"/>
+ <g id="Img_Dark">
+  <path class="base" d="M384 128l832 0 448 448 0 1344c0,70 -58,128 -128,128l-1152 0c-70,0 -128,-58 -128,-128l0 -1664c0,-70 58,-128 128,-128z"/>
+  <path class="corner" d="M1216 128l0 320c0,70 58,128 128,128l320 0 -448 -448z"/>
+  <circle class="glyph" cx="1280" cy="960" r="150"/>
+  <path class="glyph" d="M640 1600l256 -512 320 320 128 -128 256 320 0 128 -960 0 0 -128z"/>
  </g>
 </svg>

@@ -7,7 +7,7 @@ viewBox="0 0 2048 2048">
    <![CDATA[
     .star-outline {
         fill: none;
-        stroke: #5E5E5E; 
+        stroke: #000000; 
         stroke-width: 120; 
         stroke-linejoin: round; 
         stroke-miterlimit: 22.9256;

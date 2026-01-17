@@ -50,6 +50,9 @@ public:
     /// @brief обновляет информацию о файлах для отображения в интерфейс
     /// @param state текущее состояние навигации
     void updateView(const NavigationState& state);
+
+    /// @brief проверяет является ли системная тема темной
+    static bool isSystemThemeDark();
 private:
     AppCore& m_core;
 
@@ -66,6 +69,8 @@ private:
     QListView* m_fileView;
     FileListModel* m_model;
     QStandardItemModel* m_sideBarModel;
+    QPushButton* m_menuBtn;
+    QPushButton* m_starBtn;
 
     QAction* m_copyAction;
     QAction* m_cutAction;
@@ -74,7 +79,9 @@ private:
     QAction* m_secectAll;
 
     bool m_showHiddenFiles;
-    int m_currentIconSize; 
+    int m_currentIconSize;
+    
+    bool m_isDark;
 
 
     /// @brief установка интерфейса
@@ -102,6 +109,10 @@ private:
 
     int getCoreIndex(int uiIndex);
 
+    
+
+    void updateIcons();
+
     private slots:
 
         /// @brief обработчик нажатия кнопки назад в родительскую директорию
@@ -127,5 +138,13 @@ private:
         
         void showPropertiesDialog(const std::string& path);
 
+
+
+
+protected:
+
+    /// @brief обработка события смены темы
+    /// @param event событие
+    void changeEvent(QEvent *event) override;
 
 };

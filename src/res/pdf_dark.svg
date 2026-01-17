@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="2048px" height="2048px" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 2048 2048">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .base {fill:#EF5350} /* Soft Red */
+    .corner {fill:#FFCDD2}
+    .glyph {fill:#FFFFFF}
+   ]]>
+  </style>
+ </defs>
+ <g id="PDF_Dark">
+  <path class="base" d="M384 128l832 0 448 448 0 1344c0,70 -58,128 -128,128l-1152 0c-70,0 -128,-58 -128,-128l0 -1664c0,-70 58,-128 128,-128z"/>
+  <path class="corner" d="M1216 128l0 320c0,70 58,128 128,128l320 0 -448 -448z"/>
+  <path class="glyph" d="M640 1280l768 0 0 128 -768 0 0 -128zm0 -256l768 0 0 128 -768 0 0 -128zm0 -256l448 0 0 128 -448 0 0 -128z"/>
+  <path class="glyph" d="M1250 850 l150 0 c50,0 50,70 0,70 l-100 0 0 50 -50 0 0 -120z M640 1536l768 0 0 128 -768 0 0 -128z"/> 
+ </g>
+</svg>

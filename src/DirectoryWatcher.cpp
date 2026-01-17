@@ -98,7 +98,7 @@ void DirectoryWatcher::WorkerThread()
     while(m_running)
     {
 
-        int length =read(m_inotifyFd,buffer,BUF_LEN);
+        int length = read(m_inotifyFd,buffer,BUF_LEN);
 
         if(length < 0)
         {

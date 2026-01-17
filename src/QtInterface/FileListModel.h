@@ -28,6 +28,15 @@ public:
     /// @param row индекс
     const FileEntry& getFile(int row) const;
 
+    /// @brief Вспомогательный метод для заполнения словаря
+    void setupIcons(); 
+
+    /// @brief Вспомогательный метод для получения пути к иконке
+    static QString getIconPath(const std::string& filename, bool isDir);
+
+    /// @brief Принудительно обновляет модель
+    void refresh();
+
     // --- переопределенные методы ---
     
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -45,6 +54,4 @@ private:
     /// @param file нужен для извленияня разширения файла
     QIcon getIconForFile(const FileEntry& file) const;
 
-    /// @brief Вспомогательный метод для заполнения словаря
-    void setupIcons(); 
 };

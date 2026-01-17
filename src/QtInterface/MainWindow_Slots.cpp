@@ -17,6 +17,8 @@
 #include <QStyle>
 #include <QModelIndex>
 #include <QListView>
+#include <QEvent>
+#include <QTimer>
 #include <fstream>
 #include <iostream>
 
@@ -395,21 +397,7 @@ void MainWindow::showPropertiesDialog(const std::string& path)
     QFrame* backgroundFrame = new QFrame(); //фон окна
     backgroundFrame->setObjectName("MainBackground");
 
-    dialog.setStyleSheet(
-        "QFrame#MainBackground {"
-        "   background-color: #f6f6f6;"   
-        "   border-radius: 12px;"         
-        "   border: 1px solid #dbdbdb;"   
-        "}"
-        "QLabel { color: #2e3436; font-size: 14px; }"
-        "QLabel#Title { font-size: 18px; font-weight: bold; }"
-        "QLabel#SubTitle { color: #5e5c64; font-size: 13px; }"
-        
-        "QFrame#InfoCard { background-color: #ffffff; border-radius: 8px; border: 1px solid #dedede; }"
-        
-        "QPushButton { border: none; border-radius: 4px; padding: 4px; }"
-        "QPushButton:hover { background-color: #e8e8e8; }"
-    );
+    dialog.setStyleSheet(styleSheet());
 
     dialogLayout->addWidget(backgroundFrame);
 
@@ -420,16 +408,18 @@ void MainWindow::showPropertiesDialog(const std::string& path)
     // ШАПКА (Header)
     QHBoxLayout* headerLayout = new QHBoxLayout();
     
-    QPushButton* starBtn = new QPushButton();
-    starBtn->setIcon(QIcon(":/res/star_no_active.svg")); 
-    starBtn->setToolTip("Добавить в избранное");
+    m_starBtn = new QPushButton();
+    m_starBtn->setObjectName("headerBtn");
+    m_starBtn->setIcon(QIcon(":/res/star_no_active.svg")); 
+    m_starBtn->setToolTip("Добавить в избранное");
     
     QPushButton* closeBtn = new QPushButton();
+    closeBtn->setObjectName("headerBtn");
     closeBtn->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
     closeBtn->setToolTip("Закрыть");
     connect(closeBtn, &QPushButton::clicked, &dialog, &QDialog::accept);
 
-    headerLayout->addWidget(starBtn);
+    headerLayout->addWidget(m_starBtn);
     headerLayout->addStretch();
     headerLayout->addWidget(closeBtn);
 
@@ -441,9 +431,13 @@ void MainWindow::showPropertiesDialog(const std::string& path)
 
     // большаяконка
     QLabel* iconLabel = new QLabel();
-    QString iconPath = props.isDirectory ? ":/res/folder.svg" : ":/res/file.svg"; 
+
+    QString iconPath = FileListModel::getIconPath(props.name, props.isDirectory);
+
+    // QString iconPath = props.isDirectory ? ":/res/folder.svg" : ":/res/file.svg"; 
     iconLabel->setPixmap(QIcon(iconPath).pixmap(64, 64));
     iconLabel->setAlignment(Qt::AlignCenter);
+    iconLabel->setFixedSize(64, 64); //  размер лейбла = размер картинки
 
     // Имя
     QLabel* nameLabel = new QLabel(QString::fromStdString(props.name));
@@ -582,4 +576,29 @@ int MainWindow::getCoreIndex(int uiIndex)
     }
 
     return -1;
+}
+
+
+
+
+void MainWindow::changeEvent(QEvent *event)
+{
+    QMainWindow::changeEvent(event);
+
+    if (event->type() == QEvent::PaletteChange || event->type() == QEvent::ThemeChange) {
+        
+        bool currentSystemDark = isSystemThemeDark();
+        
+        if (currentSystemDark != m_isDark) {
+            m_isDark = currentSystemDark;
+            setStyleSheetsForMainWindow();
+            updateIcons();
+            
+            if (m_model) {
+                m_model->setupIcons();
+
+                QTimer::singleShot(0, m_model, &FileListModel::refresh);       //перекладывает отрисовку иконок в новой теме на следующий кадр
+            }
+        }
+    }
 }

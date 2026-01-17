@@ -3,6 +3,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QListView>
+#include <QStyleHints>
+#include <QGuiApplication>
 
 
 
@@ -12,6 +14,7 @@ MainWindow::MainWindow(AppCore& core,QWidget* parent) :
 {
     m_showHiddenFiles = false;
     m_currentIconSize = 100;
+    m_isDark = isSystemThemeDark();
 
     setUI();
     setupActions();
