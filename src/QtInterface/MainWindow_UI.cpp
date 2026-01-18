@@ -23,8 +23,8 @@
 
 void MainWindow::setUI()
 {
-    setStyleSheetsForMainWindow();
-    updateIcons();
+    // setStyleSheetsForMainWindow();
+    // updateIcons();
 
     setWindowTitle("FileManager");
     resize(1080, 550);
@@ -263,7 +263,8 @@ void MainWindow::setUI()
 
 
 
-
+    setStyleSheetsForMainWindow();
+    updateIcons();
     
 }
 
@@ -326,10 +327,10 @@ void MainWindow::updateIcons()
 
     QString suffix = dark ? "_dark.svg" : ".svg"; 
 
-    if(m_backBtn)    m_backBtn->setIcon(QIcon(":/res/back" + suffix));
-    if(m_forwardBtn) m_forwardBtn->setIcon(QIcon(":/res/forward" + suffix));
-    if(m_menuBtn)      m_menuBtn->setIcon(QIcon(":/res/3_lines" + suffix));
-    if(m_starBtn)      m_starBtn->setIcon(QIcon(":/res/star_no_active" + suffix));
+    if(m_backBtn != nullptr)    m_backBtn->setIcon(QIcon(":/res/back" + suffix));
+    if(m_forwardBtn != nullptr) m_forwardBtn->setIcon(QIcon(":/res/forward" + suffix));
+    if(m_menuBtn != nullptr)      m_menuBtn->setIcon(QIcon(":/res/3_lines" + suffix));
+    if(m_starBtn != nullptr)      m_starBtn->setIcon(QIcon(":/res/star_no_active" + suffix));
     
 
 }
