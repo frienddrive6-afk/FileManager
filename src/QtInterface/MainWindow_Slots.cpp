@@ -408,10 +408,16 @@ void MainWindow::showPropertiesDialog(const std::string& path)
     // ШАПКА (Header)
     QHBoxLayout* headerLayout = new QHBoxLayout();
     
-    m_starBtn = new QPushButton();
-    m_starBtn->setObjectName("headerBtn");
-    m_starBtn->setIcon(QIcon(":/res/star_no_active.svg")); 
-    m_starBtn->setToolTip("Добавить в избранное");
+    QPushButton* starBtn = new QPushButton();
+    starBtn->setObjectName("headerBtn");
+    if(isSystemThemeDark()) 
+    {
+        starBtn->setIcon(QIcon(":/res/star_no_active_dark.svg"));
+    }else
+    {
+        starBtn->setIcon(QIcon(":/res/star_no_active.svg"));
+    } 
+    starBtn->setToolTip("Добавить в избранное");
     
     QPushButton* closeBtn = new QPushButton();
     closeBtn->setObjectName("headerBtn");
@@ -419,7 +425,7 @@ void MainWindow::showPropertiesDialog(const std::string& path)
     closeBtn->setToolTip("Закрыть");
     connect(closeBtn, &QPushButton::clicked, &dialog, &QDialog::accept);
 
-    headerLayout->addWidget(m_starBtn);
+    headerLayout->addWidget(starBtn);
     headerLayout->addStretch();
     headerLayout->addWidget(closeBtn);
 
@@ -434,7 +440,6 @@ void MainWindow::showPropertiesDialog(const std::string& path)
 
     QString iconPath = FileListModel::getIconPath(props.name, props.isDirectory);
 
-    // QString iconPath = props.isDirectory ? ":/res/folder.svg" : ":/res/file.svg"; 
     iconLabel->setPixmap(QIcon(iconPath).pixmap(64, 64));
     iconLabel->setAlignment(Qt::AlignCenter);
     iconLabel->setFixedSize(64, 64); //  размер лейбла = размер картинки
@@ -450,7 +455,6 @@ void MainWindow::showPropertiesDialog(const std::string& path)
     if (props.isDirectory) {
         detailsText = QString("%1 объектов").arg(props.fileCount + props.folderCount) + ",   " + QString::fromStdString( FileSystemManager::FormatSize(props.size));
     } else {
-        // detailsText = QString("%1 байт").arg(props.size); 
         detailsText = QString::fromStdString( FileSystemManager::FormatSize(props.size));
     }
     QLabel* sizeLabel = new QLabel(detailsText);

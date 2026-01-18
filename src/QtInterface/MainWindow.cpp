@@ -15,8 +15,8 @@ MainWindow::MainWindow(AppCore& core,QWidget* parent) :
     m_sideBarModel(nullptr),
     m_backBtn(nullptr),
     m_forwardBtn(nullptr),
-    m_menuBtn(nullptr),
-    m_starBtn(nullptr)
+    m_menuBtn(nullptr)
+    // m_starBtn(nullptr)
 {
     m_showHiddenFiles = false;
     m_currentIconSize = 100;

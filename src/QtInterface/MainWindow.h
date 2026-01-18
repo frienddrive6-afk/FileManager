@@ -70,7 +70,7 @@ private:
     FileListModel* m_model;
     QStandardItemModel* m_sideBarModel;
     QPushButton* m_menuBtn;
-    QPushButton* m_starBtn;
+    // QPushButton* m_starBtn;
 
     QAction* m_copyAction;
     QAction* m_cutAction;
