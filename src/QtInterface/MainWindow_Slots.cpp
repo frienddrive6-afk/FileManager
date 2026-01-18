@@ -597,7 +597,11 @@ void MainWindow::changeEvent(QEvent *event)
             if (m_model) {
                 m_model->setupIcons();
 
-                QTimer::singleShot(0, m_model, &FileListModel::refresh);       //перекладывает отрисовку иконок в новой теме на следующий кадр
+                if(m_model != nullptr)
+                {
+                    m_model->setupIcons();
+                    QTimer::singleShot(0, m_model, &FileListModel::refresh);       //перекладывает отрисовку иконок в новой теме на следующий кадр
+                }
             }
         }
     }

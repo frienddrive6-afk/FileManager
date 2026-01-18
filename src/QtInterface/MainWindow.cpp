@@ -10,7 +10,9 @@
 
 MainWindow::MainWindow(AppCore& core,QWidget* parent) :
     QMainWindow(parent),
-    m_core(core)
+    m_core(core),
+    m_model(nullptr),
+    m_sideBarModel(nullptr)
 {
     m_showHiddenFiles = false;
     m_currentIconSize = 100;
