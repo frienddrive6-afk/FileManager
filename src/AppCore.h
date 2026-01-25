@@ -4,8 +4,10 @@
 #include "FileSystemManager.h"
 #include "IRenderer.h"
 #include "DirectoryWatcher.h"
+#include "Types.h"
 
 #include <functional>
+#include <QString>
 
 
 /// @brief класс основной логики программы
@@ -18,7 +20,10 @@ private:
     NavigationState state;
     DirectoryWatcher m_watcher;
     // IRenderer* render;
+    vector<FileAssociation> m_associations;
     
+
+    QString getSettingsPath();
 
 public:
     /// @brief функция которая будет вызываться при изменении состояния
@@ -99,5 +104,27 @@ public:
     /// @param targetPath путь к директории
     FileProperties GetProperties(const filesystem::path& targetPath);
 
+
+    std::function<void()> OnAssociationsChanged;
+
+    /// @brief добавляет ассоциацию(комаду с программой для открытия разширения файла)
+    /// @param rule ассоциация
+    void AddAssociation(const FileAssociation& rule);
+
+    /// @brief удаляет ассоциацию
+    /// @param extension имя разширения на пример .png
+    void RemoveAssociation(const string& extension);
+
+    /// @return возвращает вектор со всеми ассоциациями
+    const vector<FileAssociation>& GetAssociations() const;
+
+    /// @brief пытается открыть пользовательский файл
+    bool TryOpenCustom(const string& filepath);
+
+
+
+    void SaveSettings();
+
+    void LoadSettings();
 
 };

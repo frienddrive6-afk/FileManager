@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "FileListModel.h"
+#include "SettingsDialog.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -146,6 +147,18 @@ void MainWindow::setUI()
 
     settingsMenu->addAction(zoomAction);
     settingsMenu->addSeparator();
+
+
+
+    QAction* settingsAction  = new QAction("Настройки", this);
+    settingsMenu->addAction(settingsAction);
+
+    connect(settingsAction, &QAction::triggered, this, [this](){
+        
+        SettingsDialog dlg(m_core, this);
+        dlg.exec();
+
+    });
 
     //панель опций КОНЕЦ      ==========================================================
 

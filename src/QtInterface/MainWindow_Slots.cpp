@@ -20,6 +20,7 @@
 #include <QEvent>
 #include <QTimer>
 #include <QFileInfo>
+#include <QMessageBox>
 #include <fstream>
 #include <iostream>
 
@@ -46,6 +47,53 @@ void MainWindow::onAddressReturnPressed()
 
 
 
+// void MainWindow::onFileDoubleClicked(const QModelIndex& index)
+// {
+//     int coreIndex = getCoreIndex(index.row());
+//     if(coreIndex == -1)
+//     {
+//         return;
+//     }
+
+//     const FileEntry& file = m_core.GetState().GetCurrentFiles()[coreIndex];
+
+//     if(file.IsDirectory())
+//     {
+//         m_core.EnterDirectory(coreIndex);
+//     }else if(file.GetPath().extension() == ".txt")
+//     {
+//         m_core.ExecuteFile(coreIndex);
+//     }else
+//     {
+//         QString qPath = QString::fromStdString(file.GetPath().string());
+        
+//         // QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
+
+//         QFileInfo checkFile(QUrl::fromLocalFile(qPath).toLocalFile());
+
+//         #ifdef LOG_APP_CORE
+//         if (!checkFile.exists()) {
+//             qDebug() << "Ошибка: Файл не существует";
+//         } else if (!checkFile.isReadable()) {
+//             qDebug() << "Ошибка: Нет прав на чтение";
+//         } else if(!checkFile.isNativePath())
+//         {
+//             qDebug() << "Ошибка: Неверный путь";
+//         }
+//         #endif
+        
+//         bool success = QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
+
+//         if (!success) {
+//             qDebug() << "ERROR: Не удалось открыть файл:" << qPath;
+//             qDebug() << "URL:" << qPath;
+//         }
+        
+//     }
+// }
+
+
+
 void MainWindow::onFileDoubleClicked(const QModelIndex& index)
 {
     int coreIndex = getCoreIndex(index.row());
@@ -55,39 +103,46 @@ void MainWindow::onFileDoubleClicked(const QModelIndex& index)
     }
 
     const FileEntry& file = m_core.GetState().GetCurrentFiles()[coreIndex];
+    std::string filePath = file.GetPath().string();
 
+    
     if(file.IsDirectory())
     {
         m_core.EnterDirectory(coreIndex);
-    }else if(file.GetPath().extension() == ".txt")
+        return;
+    }
+
+    if (m_core.TryOpenCustom(filePath)) 
+    {
+        #ifdef LOG_APP_CORE
+        qDebug() << "Файл открыт через пользовательское правило:" << QString::fromStdString(filePath);
+        #endif
+        return; 
+    }
+
+    if(file.GetPath().extension() == ".txt")
     {
         m_core.ExecuteFile(coreIndex);
-    }else
-    {
-        QString qPath = QString::fromStdString(file.GetPath().string());
-        
-        // QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
+        return;
+    }
 
-        QFileInfo checkFile(QUrl::fromLocalFile(qPath).toLocalFile());
+    QString qPath = QString::fromStdString(filePath);
+    QUrl url = QUrl::fromLocalFile(qPath); 
 
-        #ifdef LOG_APP_CORE
-        if (!checkFile.exists()) {
-            qDebug() << "Ошибка: Файл не существует";
-        } else if (!checkFile.isReadable()) {
-            qDebug() << "Ошибка: Нет прав на чтение";
-        } else if(!checkFile.isNativePath())
-        {
-            qDebug() << "Ошибка: Неверный путь";
-        }
-        #endif
-        
-        bool success = QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
-
-        if (!success) {
-            qDebug() << "ERROR: Не удалось открыть файл:" << qPath;
-            qDebug() << "URL:" << qPath;
-        }
-        
+    #ifdef LOG_APP_CORE
+    QFileInfo checkFile(qPath);
+    if (!checkFile.exists()) {
+        qDebug() << "Ошибка: Файл не существует";
+    } else if (!checkFile.isReadable()) {
+        qDebug() << "Ошибка: Нет прав на чтение";
+    }
+    #endif
+    
+    bool success = QDesktopServices::openUrl(url);
+    
+    if (!success) {
+        qDebug() << "ERROR: Не удалось открыть файл системным методом:" << qPath;
+        QMessageBox::warning(this, "Ошибка", "Не удалось открыть файл. Проверьте ассоциации в системе.");
     }
 }
 
@@ -179,6 +234,7 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
         QAction* renameFile = menu->addAction("Переименовать");
         connect(renameFile, &QAction::triggered, this, [this, index](){
             int coreIndex = getCoreIndex(index.row());
+            // int coreIndex = getCoreIndex(getCoreIndex(index.row()));
             m_core.OnRenameRequest(getUserInput(QString::fromStdString(m_core.getNameOnIndex(coreIndex))).toStdString()); 
             updateView(m_core.GetState());
         });
@@ -224,8 +280,14 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
         QAction *propertiesAction = menu->addAction("Свойства");
         connect(propertiesAction, &QAction::triggered, this, [this, index](){
 
-            string path = m_core.GetState().GetCurrentFiles()[index.row()].GetPath().string();
+            int coreIndex = getCoreIndex(index.row());
+
+            if (coreIndex == -1) return;
+
+            string path = m_core.GetState().GetCurrentFiles()[coreIndex].GetPath().string();
             
+            // string path = m_core.GetState().GetCurrentFiles()[index.row()].GetPath().string();
+
             showPropertiesDialog(path);
         });
     } 

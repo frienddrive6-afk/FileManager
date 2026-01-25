@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     AppCore core;
+    core.LoadSettings();
 
     MainWindow window(core); 
     window.show();

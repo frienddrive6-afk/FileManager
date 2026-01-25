@@ -40,3 +40,12 @@ struct FileProperties {
     
     FileProperties() : size(0), fileCount(0), folderCount(0), isDirectory(false) {}
 };
+
+
+//Структура описывающая ассоциацию расширений с командами
+struct FileAssociation
+{
+    std::string extension;
+    std::string command;
+    bool runInTerminal;
+};

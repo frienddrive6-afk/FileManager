@@ -43,6 +43,8 @@ add_executable(filemanager
     src/QtInterface/MainWindow_Slots.cpp
     src/DirectoryWatcher.cpp
     src/DirectoryWatcher.h
+    src/QtInterface/SettingsDialog.h
+    src/QtInterface/SettingsDialog.cpp
 )
 
 target_link_libraries(filemanager PRIVATE Qt6::Widgets)

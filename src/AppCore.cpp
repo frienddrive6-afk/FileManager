@@ -6,6 +6,12 @@
 #include <filesystem>
 #include <string>
 
+#include <QProcess>
+#include <QSettings>
+#include <QCoreApplication> // Чтобы узнать путь к исполняемому файлу
+#include <QDir>
+#include <QString>
+
 using namespace std;
 
 
@@ -382,4 +388,144 @@ FileProperties AppCore::GetProperties(const filesystem::path& targetPath)
 
     return props;
 
+}
+
+
+
+
+
+void AppCore::AddAssociation(const FileAssociation& rule)
+{
+    m_associations.push_back(rule);
+
+    SaveSettings();
+
+    if(OnAssociationsChanged)
+    {
+        OnAssociationsChanged();
+    }
+}
+
+
+void AppCore::RemoveAssociation(const string& extension)
+{
+    for(int i{}; i < m_associations.size(); ++i)
+    {
+        if(m_associations[i].extension == extension)
+        {
+            m_associations.erase(m_associations.begin() + i);
+            break;
+        }
+    }
+
+    SaveSettings();
+
+    if(OnAssociationsChanged)
+    {
+        OnAssociationsChanged();
+    }
+}
+
+
+const vector<FileAssociation>& AppCore::GetAssociations() const
+{
+    return m_associations;
+}
+
+bool AppCore::TryOpenCustom(const string& filepath)
+{
+    string stdExt = std::filesystem::path(filepath).extension().string();
+    QString currentExt = QString::fromStdString(stdExt).toLower();
+
+    for(const FileAssociation& rule : m_associations)
+    {
+        if(QString::fromStdString(rule.extension).toLower() == currentExt)
+        {
+            QString command = QString::fromStdString(rule.command);
+            
+            QString safePath = "\"" + QString::fromStdString(filepath) + "\"";
+            command.replace("%path%", safePath);
+
+            if(rule.runInTerminal)
+            {
+                QStringList args;
+                args << "-e" << command;
+                
+                QProcess::startDetached("x-terminal-emulator", args);
+            }
+            else
+            {
+                QProcess::startDetached("/bin/sh", QStringList() << "-c" << command);
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+
+
+
+QString AppCore::getSettingsPath()
+{
+    //Путь для теста настроект находтся рядом с исполняемым файлом
+    // return QCoreApplication::applicationDirPath() + "/settings.ini";
+
+    // Путь в ~/.config/
+    return QDir::homePath() + "/.config/filemanagerOnQt/settings.ini";
+}
+
+
+void AppCore::SaveSettings()
+{
+
+    QSettings settings(getSettingsPath(), QSettings::IniFormat);
+
+    settings.beginWriteArray("Associations");
+
+    for(unsigned long long i{}; i < m_associations.size(); ++i)
+    {
+        settings.setArrayIndex(i);
+
+        settings.setValue("ext", QString::fromStdString(m_associations[i].extension));
+        settings.setValue("cmd", QString::fromStdString(m_associations[i].command));
+        settings.setValue("term", m_associations[i].runInTerminal);
+
+    }
+
+    settings.endArray();
+
+    settings.sync();
+}
+
+
+void AppCore::LoadSettings()
+{
+    QSettings settings(getSettingsPath(), QSettings::IniFormat);
+
+
+    m_associations.clear();
+
+    int size = settings.beginReadArray("Associations");
+
+    for(int i{}; i < size; ++i)
+    {
+        settings.setArrayIndex(i);
+
+        FileAssociation rule;
+
+        rule.extension = settings.value("ext").toString().toStdString();
+        rule.command = settings.value("cmd").toString().toStdString();
+        rule.runInTerminal = settings.value("term").toBool();
+
+        m_associations.push_back(rule);
+    }
+
+
+    settings.endArray();
+
+    if(OnAssociationsChanged)
+    {
+        OnAssociationsChanged();
+    }
 }
