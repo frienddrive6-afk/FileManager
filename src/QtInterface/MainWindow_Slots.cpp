@@ -45,55 +45,6 @@ void MainWindow::onAddressReturnPressed()
 
 
 
-
-
-// void MainWindow::onFileDoubleClicked(const QModelIndex& index)
-// {
-//     int coreIndex = getCoreIndex(index.row());
-//     if(coreIndex == -1)
-//     {
-//         return;
-//     }
-
-//     const FileEntry& file = m_core.GetState().GetCurrentFiles()[coreIndex];
-
-//     if(file.IsDirectory())
-//     {
-//         m_core.EnterDirectory(coreIndex);
-//     }else if(file.GetPath().extension() == ".txt")
-//     {
-//         m_core.ExecuteFile(coreIndex);
-//     }else
-//     {
-//         QString qPath = QString::fromStdString(file.GetPath().string());
-        
-//         // QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
-
-//         QFileInfo checkFile(QUrl::fromLocalFile(qPath).toLocalFile());
-
-//         #ifdef LOG_APP_CORE
-//         if (!checkFile.exists()) {
-//             qDebug() << "Ошибка: Файл не существует";
-//         } else if (!checkFile.isReadable()) {
-//             qDebug() << "Ошибка: Нет прав на чтение";
-//         } else if(!checkFile.isNativePath())
-//         {
-//             qDebug() << "Ошибка: Неверный путь";
-//         }
-//         #endif
-        
-//         bool success = QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
-
-//         if (!success) {
-//             qDebug() << "ERROR: Не удалось открыть файл:" << qPath;
-//             qDebug() << "URL:" << qPath;
-//         }
-        
-//     }
-// }
-
-
-
 void MainWindow::onFileDoubleClicked(const QModelIndex& index)
 {
     int coreIndex = getCoreIndex(index.row());
@@ -210,17 +161,9 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
     if (index.isValid()) { //Окно при нажатии на файл
 
-        
         QAction *openAction = menu->addAction("Открыть");
         connect(openAction, &QAction::triggered, this, [this, index](){
-            int coreIndex = getCoreIndex(index.row());
-            if (coreIndex != -1) {
-                m_core.EnterDirectory(coreIndex);
-            }
-            #ifdef LOG_APP_CORE
-                qDebug() << "Открыть" << QString::fromStdString(m_core.getNameOnIndex(coreIndex)) <<'\n';
-
-            #endif
+            onFileDoubleClicked(index); 
         });
 
 
@@ -234,7 +177,6 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
         QAction* renameFile = menu->addAction("Переименовать");
         connect(renameFile, &QAction::triggered, this, [this, index](){
             int coreIndex = getCoreIndex(index.row());
-            // int coreIndex = getCoreIndex(getCoreIndex(index.row()));
             m_core.OnRenameRequest(getUserInput(QString::fromStdString(m_core.getNameOnIndex(coreIndex))).toStdString()); 
             updateView(m_core.GetState());
         });
