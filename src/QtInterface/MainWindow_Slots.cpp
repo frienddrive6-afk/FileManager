@@ -19,6 +19,7 @@
 #include <QListView>
 #include <QEvent>
 #include <QTimer>
+#include <QFileInfo>
 #include <fstream>
 #include <iostream>
 
@@ -65,10 +66,29 @@ void MainWindow::onFileDoubleClicked(const QModelIndex& index)
     {
         QString qPath = QString::fromStdString(file.GetPath().string());
         
-        QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
-    
+        // QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
+
+        QFileInfo checkFile(QUrl::fromLocalFile(qPath).toLocalFile());
+
+        #ifdef LOG_APP_CORE
+        if (!checkFile.exists()) {
+            qDebug() << "Ошибка: Файл не существует";
+        } else if (!checkFile.isReadable()) {
+            qDebug() << "Ошибка: Нет прав на чтение";
+        } else if(!checkFile.isNativePath())
+        {
+            qDebug() << "Ошибка: Неверный путь";
+        }
+        #endif
+        
+        bool success = QDesktopServices::openUrl(QUrl::fromLocalFile(qPath));
+
+        if (!success) {
+            qDebug() << "ERROR: Не удалось открыть файл:" << qPath;
+            qDebug() << "URL:" << qPath;
+        }
+        
     }
-    
 }
 
 

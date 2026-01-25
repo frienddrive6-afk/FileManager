@@ -112,7 +112,7 @@ QIcon FileListModel::getIconForFile(const FileEntry& file) const
     }
 
     #ifdef LOG_ENABLED
-    qDebug() << QString::fromStdString(file.GetPath().extension().string()) <<"\n";
+    // qDebug() << QString::fromStdString(file.GetPath().extension().string()) <<"\n";
     #endif
     
     // Если не нашли иконку - возвращаем дефолтную
