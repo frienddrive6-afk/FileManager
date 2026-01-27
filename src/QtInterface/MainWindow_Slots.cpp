@@ -29,9 +29,15 @@
 
 void MainWindow::onBackClicked()
 {
-    m_core.GoUp();
+    // m_core.GoUp();
+    m_core.GoBack();
 }
 
+
+void MainWindow::onForwardClicked()
+{
+    m_core.GoForward();
+}
 
 
 
@@ -347,6 +353,16 @@ void MainWindow::updateView(const NavigationState& state)
 
 
         
+    }
+
+    if(m_backBtn)
+    {
+        m_backBtn->setEnabled(state.CanGoBack());
+    }
+    
+    if(m_forwardBtn)
+    {
+        m_forwardBtn->setEnabled(state.CanGoForward());
     }
 
 }

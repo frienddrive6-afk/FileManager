@@ -529,3 +529,37 @@ void AppCore::LoadSettings()
         OnAssociationsChanged();
     }
 }
+
+
+
+
+
+
+void AppCore::GoBack()
+{
+    if (state.CanGoBack())
+    {
+        state.StepBack();
+
+        state.Refresh(FileSystemManager::LoadDirectory(state.GetCurrentPath()));
+
+        if (OnStateChanged) {
+            OnStateChanged(state);
+        }
+    }
+}
+
+
+void AppCore::GoForward()
+{
+    if (state.CanGoForward())
+    {
+        state.StepForward();
+
+        state.Refresh(FileSystemManager::LoadDirectory(state.GetCurrentPath()));
+
+        if (OnStateChanged) {
+            OnStateChanged(state);
+        }
+    }
+}

@@ -122,9 +122,15 @@ public:
     bool TryOpenCustom(const string& filepath);
 
 
-
+    /// @brief сохраняет настроики
     void SaveSettings();
 
+    /// @brief загружает настроики
     void LoadSettings();
+
+
+    void GoBack();
+
+    void GoForward();
 
 };

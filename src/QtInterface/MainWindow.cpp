@@ -26,6 +26,8 @@ MainWindow::MainWindow(AppCore& core,QWidget* parent) :
     setupActions();
 
     connect(m_backBtn, &QPushButton::clicked, this, &MainWindow::onBackClicked);
+    connect(m_forwardBtn, &QPushButton::clicked, this, &MainWindow::onForwardClicked);
+
     connect(m_addressBar, &QLineEdit::returnPressed,this, &MainWindow::onAddressReturnPressed);
     connect(m_fileView, &QListView::doubleClicked, this, &MainWindow::onFileDoubleClicked);
     connect(m_sideBar, &QListView::clicked, this, &MainWindow::goToDirectory);

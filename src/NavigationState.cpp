@@ -33,7 +33,18 @@ NavigationState::NavigationState(const filesystem::path& path, ClipboardMode cli
 
 void NavigationState::SetPath(const filesystem::path& path)
 {
-    this->currentPath = path;
+    if(this->currentPath != path)
+    {
+        if(!currentPath.empty())
+        {
+            m_backHistory.push_back(currentPath);
+        }
+
+        m_forwardHistory.clear();
+
+        this->currentPath = path;
+    }
+
 }
 
 void NavigationState::SetCurrentFiles(const vector<FileEntry>& files)
@@ -196,4 +207,88 @@ void NavigationState::SetFileSelection(int index, bool selected)
     {
         currentFiles[index].SetSelected(selected);
     }
+}
+
+
+
+
+void NavigationState::PushToBackHistory(const filesystem::path& path)
+{
+    m_backHistory.push_back(path);
+}
+
+
+filesystem::path NavigationState::PopBackHistory()
+{
+    filesystem::path path = m_backHistory.back();
+    m_backHistory.pop_back();
+    return path;
+}
+
+
+void NavigationState::PushToForwardHistory(const filesystem::path& path)
+{
+    m_forwardHistory.push_back(path);
+}
+
+
+filesystem::path NavigationState::PopForwardHistory()
+{
+    filesystem::path path = m_forwardHistory.back();
+    m_forwardHistory.pop_back();
+    return path;
+}
+
+void NavigationState::ClearForwardHistory()
+{
+    m_forwardHistory.clear();
+}
+
+
+bool NavigationState::CanGoBack() const
+{
+    return !m_backHistory.empty();
+}
+
+bool NavigationState::CanGoForward() const
+{
+    return !m_forwardHistory.empty();
+}
+
+
+void NavigationState::StepBack()
+{
+    if(m_backHistory.empty())
+    {
+        return;
+    }
+
+    m_forwardHistory.push_back(this->currentPath);
+
+    this->currentPath = m_backHistory.back();
+
+    #ifdef LOG_ENABLED
+    cout << "StepBack: " << this->currentPath << endl;
+    #endif
+
+    m_backHistory.pop_back();
+}
+
+
+void NavigationState::StepForward()
+{
+    if(m_forwardHistory.empty())
+    {
+        return;
+    }
+
+    m_backHistory.push_back(this->currentPath);
+
+    this->currentPath = m_forwardHistory.back();
+
+    #ifdef LOG_ENABLED
+    cout << "StepForward: " << this->currentPath << endl;
+    #endif
+
+    m_forwardHistory.pop_back();
 }

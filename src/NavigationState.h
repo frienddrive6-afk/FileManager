@@ -24,6 +24,10 @@ private:
     ClipboardMode clipboardMode;                            
     FileComparator currentSortAlgo;
 
+    // история посищеннных папок
+    std::vector<std::filesystem::path> m_backHistory;
+    std::vector<std::filesystem::path> m_forwardHistory;
+
 public:
     //конструктор без параметров устанавливает текущий путь в домашнюю директорию пользователя
     NavigationState();
@@ -98,6 +102,36 @@ public:
     /// @param index индекс файла в текущем списке файлов
     /// @param selected статус выделения
     void SetFileSelection(int index, bool selected);
+
+
+
+
+    /// @brief добавляет текущий путь в историю
+    /// @param path путь к файлу или директории
+    void PushToBackHistory(const filesystem::path& path);
+
+    /// @brief возвращает текущий путь из истории и удаляет его из истории
+    filesystem::path PopBackHistory(); 
+    
+    /// @brief добавляет текущий путь в историю
+    /// @param path путь к файлу или директории
+    void PushToForwardHistory(const filesystem::path& path);
+
+    /// @brief возвращает текущий путь из истории и удаляет его из истории
+    filesystem::path PopForwardHistory();
+    
+    /// @brief очищает историю назад
+    void ClearForwardHistory(); 
+
+    /// @brief возвращает bool значиние является ли история назад пустой 
+    bool CanGoBack() const;
+
+    /// @brief возвращает bool значиние является ли история вперед пустой
+    bool CanGoForward() const;
+
+    
+    void StepBack();
+    void StepForward();
 
 
 };

@@ -118,6 +118,9 @@ private:
         /// @brief обработчик нажатия кнопки назад в родительскую директорию
         void onBackClicked();
 
+        /// @brief обработчик нажатия кнопки вперед
+        void onForwardClicked();
+
         /// @brief обработчик нажатия кнопки вперед в дочернюю директорию
         void onAddressReturnPressed();
 
