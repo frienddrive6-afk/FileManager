@@ -128,9 +128,10 @@ public:
     /// @brief загружает настроики
     void LoadSettings();
 
-
+    /// @brief переходит в предыдущую директорию по массиву history
     void GoBack();
 
+    /// @brief переходит в следующую директорию по массиву history
     void GoForward();
 
 };

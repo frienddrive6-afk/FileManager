@@ -21,6 +21,8 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GIO REQUIRED gio-2.0)
 
 include_directories(src)
 include_directories(src/QtInterface)
@@ -45,6 +47,15 @@ add_executable(filemanager
     src/DirectoryWatcher.h
     src/QtInterface/SettingsDialog.h
     src/QtInterface/SettingsDialog.cpp
+    src/LinuxAppManager.h
+    src/LinuxAppManager.cpp
+    src/QtInterface/OpenWithDialog.h
+    src/QtInterface/OpenWithDialog.cpp
 )
 
-target_link_libraries(filemanager PRIVATE Qt6::Widgets)
+target_include_directories(filemanager PRIVATE ${GIO_INCLUDE_DIRS})
+
+target_link_libraries(filemanager PRIVATE 
+    Qt6::Widgets 
+    ${GIO_LIBRARIES}
+)

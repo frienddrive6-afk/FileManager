@@ -53,10 +53,18 @@ public:
     static void CreateEmtyTXTFile(const filesystem::path& path,const string& name);
 
 
-    
+    /// @brief получает информацию о директории
+    /// @param path путь к директории
+    /// @return информация о директории
     static DirectoryInfo GetDirectoryInfo(const filesystem::path& path);
 
+    /// @brief форматирует время
+    /// @param ftime время
+    /// @return форматированное время
     static string FormatTime(filesystem::file_time_type ftime);
 
+    /// @brief форматирует размер
+    /// @param size размер
+    /// @return форматированный размер
     static string FormatSize(uintmax_t size);
 };

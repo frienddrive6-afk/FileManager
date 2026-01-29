@@ -95,6 +95,8 @@ public:
     /// @return вектор индексов типа string
     vector<string> whoIsSelacted() const;
 
+    /// @brief возвращает список путей выделенных файлов
+    /// @return вектор путей
     vector<filesystem::path> whoIsSelactedPath() const;
 
 
@@ -129,8 +131,10 @@ public:
     /// @brief возвращает bool значиние является ли история вперед пустой
     bool CanGoForward() const;
 
-    
+    /// @brief делает шаг назад по истории
     void StepBack();
+
+    /// @brief делает шаг вперед по истории
     void StepForward();
 
 

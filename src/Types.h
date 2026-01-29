@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 //Описывает типы файлов (директория, регулярный файл, символьная ссылка, неизвестно)
 enum FileType
 {
@@ -48,4 +50,30 @@ struct FileAssociation
     std::string extension;
     std::string command;
     bool runInTerminal;
+};
+
+
+/// @brief Структура, описывающая установленное приложение в Linux
+struct AppInfo
+{
+    std::string name;
+    std::string iconName;
+    std::string execCommand;
+    std::vector<std::string> supportedMimeTypes;
+    bool isTerminal;
+
+    bool Supports(const std::string& mimeType) const
+    {
+        for(const std::string& type : supportedMimeTypes)
+        {
+            if(type == mimeType)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
 };

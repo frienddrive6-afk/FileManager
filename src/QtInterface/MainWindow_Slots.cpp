@@ -1,6 +1,8 @@
 #include "MainWindow.h"
 #include "FileListModel.h"
 #include "Types.h" 
+#include "LinuxAppManager.h"
+#include "OpenWithDialog.h"
 
 #include <QMenu>
 #include <QCursor>
@@ -173,6 +175,33 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
         });
 
 
+        QAction *openWithAction = menu->addAction("Открыть с помощью...");
+        connect(openWithAction, &QAction::triggered, this, [this, index](){
+            
+            int coreIndex = getCoreIndex(index.row());        //настоящий индекс
+            if (coreIndex == -1) return;
+            
+            std::string filePath = m_core.GetState().GetCurrentFiles()[coreIndex].GetPath().string();       //получаем путь к файлу с помощью индекса
+
+            std::vector<AppInfo> apps = LinuxAppManager::GetAppsForFile(filePath);                          //Получаем список программ
+
+            OpenWithDialog dialog(filePath, apps, this);
+            
+            if (dialog.exec() == QDialog::Accepted) {
+                
+                std::string cmd = dialog.getFinalCommand();
+                
+                if (!cmd.empty()) {
+                    QProcess::startDetached("/bin/sh", QStringList() << "-c" << QString::fromStdString(cmd));       //запуск выбранной программы
+                    
+                    #ifdef LOG_APP_CORE
+                    qDebug() << "Custom Launch:" << QString::fromStdString(cmd);
+                    #endif
+                }
+            }
+        });
+
+        menu->addSeparator();
 
         menu->addAction(m_cutAction);
         
