@@ -506,14 +506,6 @@ void MainWindow::showPropertiesDialog(const std::string& path, const QIcon& icon
     infoLayout->setAlignment(Qt::AlignCenter);
 
     // ИКОНКИ
-    // QLabel* iconLabel = new QLabel();
-
-    // QString iconPath = FileListModel::getIconPath(props.name, props.isDirectory);
-
-    // iconLabel->setPixmap(QIcon(iconPath).pixmap(64, 64));
-    // iconLabel->setAlignment(Qt::AlignCenter);
-    // iconLabel->setFixedSize(64, 64); //  размер лейбла = размер картинки
-
     QLabel* iconLabel = new QLabel();
     
     QPixmap finalPixmap;
@@ -538,6 +530,7 @@ void MainWindow::showPropertiesDialog(const std::string& path, const QIcon& icon
     nameLabel->setObjectName("Title");
     nameLabel->setAlignment(Qt::AlignCenter);
     nameLabel->setWordWrap(true);  //Разрешить перенос
+    nameLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     // Детали
     QString detailsText;
@@ -549,6 +542,8 @@ void MainWindow::showPropertiesDialog(const std::string& path, const QIcon& icon
     QLabel* sizeLabel = new QLabel(detailsText);
     sizeLabel->setObjectName("SubTitle");
     sizeLabel->setAlignment(Qt::AlignCenter);
+    sizeLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
 
     infoLayout->addWidget(iconLabel);
     infoLayout->addWidget(nameLabel);
@@ -568,10 +563,12 @@ void MainWindow::showPropertiesDialog(const std::string& path, const QIcon& icon
     // Родительская папка
     QLabel* parentValue = new QLabel(QString::fromStdString(props.parentPath));
     parentValue->setWordWrap(true);
+    parentValue->setTextInteractionFlags(Qt::TextSelectableByMouse);
     formLayout->addRow("Родительская папка", parentValue);
 
     // Дата изменения
     QLabel* modifiedValue = new QLabel(QString::fromStdString(props.dateModified));
+    modifiedValue->setTextInteractionFlags(Qt::TextSelectableByMouse);
     formLayout->addRow("Последнее изменение", modifiedValue);
 
     // Дата создания
