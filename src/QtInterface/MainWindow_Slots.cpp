@@ -364,56 +364,40 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
 
 
-
-
-
-
 void MainWindow::updateView(const NavigationState& state)
 {
     m_addressBar->setText(QString::fromStdString(state.GetCurrentPath().string()));
 
+    if (m_backBtn) m_backBtn->setEnabled(state.CanGoBack());
+    if (m_forwardBtn) m_forwardBtn->setEnabled(state.CanGoForward());
+
     if(m_model)
     {
-
         std::vector<FileEntry> allFiles = state.GetCurrentFiles();
 
         if(!m_showHiddenFiles)
         {
             std::vector<FileEntry> filteredFiles;
-
-            filteredFiles.reserve(allFiles.size());         //бронирует память в куче
+            filteredFiles.reserve(allFiles.size());
 
             for(const FileEntry& file : allFiles)
             {
-                if(file.GetName().size() > 0 && file.GetName()[0] != '.')
+                QString qName = QString::fromStdString(file.GetName());
+
+
+                if (!qName.startsWith('.') && !qName.endsWith('~')) 
                 {
                     filteredFiles.push_back(file);
                 }
             }
-
             m_model->updateData(filteredFiles);
-        }else
+        }
+        else 
         {
             m_model->updateData(allFiles);
         }
-
-
-        
     }
-
-    if(m_backBtn)
-    {
-        m_backBtn->setEnabled(state.CanGoBack());
-    }
-    
-    if(m_forwardBtn)
-    {
-        m_forwardBtn->setEnabled(state.CanGoForward());
-    }
-
 }
-
-
 
 
 
