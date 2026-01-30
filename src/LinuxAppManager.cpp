@@ -5,40 +5,50 @@
 #include <algorithm>
 #include <cstdlib>   // Для getenv
 #include <gio/gio.h>
+#include <unordered_set>
 
-
-const vector<string> APP_DIRS = {
-    "/usr/share/applications",
-    "/usr/local/share/applications",
-    // ~/.local/share/applications
-};
 
 
 vector<AppInfo> LinuxAppManager::GetAllApps()
 {
     vector<AppInfo> apps;
-    vector<string> dirs = APP_DIRS;
 
-    const char* home = getenv("HOME");
-    if (home) {
-        dirs.push_back(string(home) + "/.local/share/applications");
-    }
+    GList* appList = g_app_info_get_all();
 
-    for (const auto& dirPath : dirs) {
-        if (!filesystem::exists(dirPath)) continue;
+    for (GList* l = appList; l != nullptr; l = l->next) 
+    {
+        GAppInfo* gApp = G_APP_INFO(l->data);
 
-        for (const auto& entry : filesystem::directory_iterator(dirPath)) {
-            if (entry.path().extension() == ".desktop") {
-                AppInfo app = ParseDesktopFile(entry.path());
-                
-                if (!app.name.empty() && !app.execCommand.empty()) {
-                    apps.push_back(app);
-                }
-            }
+        if (!g_app_info_should_show(gApp)) continue;
+
+        AppInfo info;
+        
+        // Имя например Visual Studio Code
+        const char* name = g_app_info_get_name(gApp);
+        info.name = name ? string(name) : "Unknown";
+
+        // Команда запуска например code %f
+        const char* exec = g_app_info_get_commandline(gApp);
+        info.execCommand = exec ? string(exec) : "";
+
+        // Иконка
+        GIcon* gIcon = g_app_info_get_icon(gApp);
+        if (gIcon) {
+            gchar* iconStr = g_icon_to_string(gIcon);
+            info.iconName = iconStr ? string(iconStr) : "";
+            g_free(iconStr);
         }
+
+
+        apps.push_back(info);
     }
+
+    // Чистим список и уменьшаем счетчик ссылок у объектов внутри
+    g_list_free_full(appList, g_object_unref);
+
     return apps;
 }
+
 
 AppInfo LinuxAppManager::ParseDesktopFile(const filesystem::path& path)
 {
@@ -99,20 +109,59 @@ AppInfo LinuxAppManager::ParseDesktopFile(const filesystem::path& path)
 
 vector<AppInfo> LinuxAppManager::GetAppsForFile(const filesystem::path& filePath)
 {
-    vector<AppInfo> allApps = GetAllApps();
+    vector<AppInfo> resultApps;
+    unordered_set<string> addedIds; 
+
+    // Определяем MIME-тип
+    gboolean uncertain;
+    gchar* mimeType = g_content_type_guess(filePath.c_str(), nullptr, 0, &uncertain);
     
-    string mime = GetMimeType(filePath);
+    // Сначала получаем релевантные приложения (верх списка)
+    GList* recommended = g_app_info_get_all_for_type(mimeType);
+    
+    // Получаем вообще все приложения в системе
+    GList* allApps = g_app_info_get_all();
 
-    std::stable_sort(allApps.begin(), allApps.end(), 
-        [&mime](const AppInfo& a, const AppInfo& b) {
-            bool aSupports = a.Supports(mime);
-            bool bSupports = b.Supports(mime);
+    auto processApp = [&](GAppInfo* gApp) {
+        const char* id = g_app_info_get_id(gApp);
+        string idStr = id ? id : "";
+
+        // Если приложения в список если его ещё нет
+        if (!idStr.empty() && addedIds.find(idStr) == addedIds.end() && g_app_info_should_show(gApp)) {
+            AppInfo info;
+            info.name = g_app_info_get_name(gApp);
             
-            return aSupports && !bSupports; 
-        }
-    );
+            const char* exec = g_app_info_get_commandline(gApp);
+            info.execCommand = exec ? string(exec) : "";
 
-    return allApps;
+            GIcon* gIcon = g_app_info_get_icon(gApp);
+            if (gIcon) {
+                gchar* iconStr = g_icon_to_string(gIcon);
+                info.iconName = iconStr ? string(iconStr) : "";
+                g_free(iconStr);
+            }
+
+            resultApps.push_back(info);
+            addedIds.insert(idStr);
+        }
+    };
+
+    // Сначала проходим по рекомендованным
+    for (GList* l = recommended; l != nullptr; l = l->next) {
+        processApp(G_APP_INFO(l->data));
+    }
+
+    // Затем по всем остальным 
+    for (GList* l = allApps; l != nullptr; l = l->next) {
+        processApp(G_APP_INFO(l->data));
+    }
+
+    // Чистка памяти
+    g_list_free_full(recommended, g_object_unref);
+    g_list_free_full(allApps, g_object_unref);
+    g_free(mimeType);
+
+    return resultApps;
 }
 
 vector<string> LinuxAppManager::SplitString(const string& str, char delimiter)
