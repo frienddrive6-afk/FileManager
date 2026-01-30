@@ -1,8 +1,11 @@
 #include "FileListModel.h"
+
 #include <filesystem>
 #include <QDebug>
 #include <QGuiApplication>
 #include <QPalette>
+#include <QtConcurrent/QtConcurrent>
+#include <QImageReader>
 
 FileListModel::FileListModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -12,6 +15,8 @@ FileListModel::FileListModel(QObject *parent)
 
 void FileListModel::updateData(const std::vector<FileEntry>& newFiles)
 {
+    clearCache();
+
     beginResetModel();
 
     m_files = newFiles;
@@ -57,8 +62,31 @@ QVariant FileListModel::data(const QModelIndex &index, int role) const
     }
 
     // роль DecorationRole возвращает иконку для файла 
+    // if (role == Qt::DecorationRole) {
+    //     return getIconForFile(file);
+    // }
+
     if (role == Qt::DecorationRole) {
-        return getIconForFile(file);
+        if (file.IsDirectory()) return getIconForFile(file);
+
+        QString filePath = QString::fromStdString(file.GetPath().string());
+        QString ext = QString::fromStdString(file.GetPath().extension().string()).toLower();
+
+        bool isImage = (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".svg");
+
+        if (isImage) {
+            if (m_thumbnailCache.contains(filePath)) {          //  если в кэше есть картинка возвращаем ее
+                return m_thumbnailCache[filePath];
+            }
+
+            if (!m_loadingPaths.contains(filePath)) {           //  если в кэше нет картинки - говорим загрузизь в кеш
+                loadThumbnailAsync(filePath, index.row());
+            }
+            
+            return getIconForFile(file);            //на момент загрузки картинки возвращаем дефолтную
+        }
+
+        return getIconForFile(file);              // если не картинка
     }
 
     // роль TextAlignmentRole какое выравнивание будет у текста
@@ -160,4 +188,67 @@ QString FileListModel::getIconPath(const std::string& filename, bool isDir)
 void FileListModel::refresh()
 {
     emit layoutChanged();
+}
+
+
+
+void FileListModel::clearCache()
+{
+    m_thumbnailCache.clear();
+    m_loadingPaths.clear();
+}
+
+
+
+
+
+void FileListModel::loadThumbnailAsync(const QString& path, int row) const
+{
+
+    m_loadingPaths.insert(path);
+
+    QFuture<QIcon> future = QtConcurrent::run([path]() -> QIcon 
+    {
+        //Выполняется в отдельном потоке
+        
+        QImageReader reader(path);
+
+        reader.setScaledSize(QSize(128, 128));
+
+
+        QImage image = reader.read();
+        if(image.isNull())
+        {
+            return QIcon();
+        }
+
+        return QIcon(QPixmap::fromImage(image));
+    });
+
+
+    QFutureWatcher<QIcon>* watcher = new QFutureWatcher<QIcon>();
+
+    connect(watcher, &QFutureWatcher<QIcon>::finished, [=](){
+        //код в главном потоке
+
+        QIcon result = watcher->result();
+
+        if(!result.isNull())
+        {
+            m_thumbnailCache[path] = result;
+        }
+
+        m_loadingPaths.remove(path);
+
+        if (row < m_files.size()) { 
+            QModelIndex idx = this->index(row, 0);
+            const_cast<FileListModel*>(this)->dataChanged(idx, idx, {Qt::DecorationRole});
+        }
+
+        watcher->deleteLater();
+    });
+
+
+    watcher->setFuture(future);
+
 }

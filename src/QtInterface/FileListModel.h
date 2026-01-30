@@ -4,6 +4,9 @@
 #include <vector>
 #include <QIcon>
 #include <QHash>
+#include <QMap>
+#include <QSet>
+#include <QFutureWatcher> // Для потоков
 
 #include "FileEntry.h"
 #include "NavigationState.h"
@@ -53,5 +56,20 @@ private:
     /// @brief возвращает иконку для указанного FileEntry
     /// @param file нужен для извленияня разширения файла
     QIcon getIconForFile(const FileEntry& file) const;
+
+
+
+
+    /// @brief Кэш иконок
+    mutable QMap<QString, QIcon> m_thumbnailCache;
+
+    /// @brief Список файлов которые прямо сейчас грузятся 
+    mutable QSet<QString> m_loadingPaths;
+
+    /// @brief Вспомогательный метод для запуска потока
+    void loadThumbnailAsync(const QString& path, int row) const;
+    
+    /// @brief Очистка кэша при смене папки
+    void clearCache();
 
 };

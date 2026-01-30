@@ -19,7 +19,7 @@ if(EXISTS "${MY_LOCAL_QT}")
     list(PREPEND CMAKE_PREFIX_PATH "${MY_LOCAL_QT}")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Concurrent)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GIO REQUIRED gio-2.0)
@@ -58,4 +58,5 @@ target_include_directories(filemanager PRIVATE ${GIO_INCLUDE_DIRS})
 target_link_libraries(filemanager PRIVATE 
     Qt6::Widgets 
     ${GIO_LIBRARIES}
+    Qt6::Concurrent
 )
