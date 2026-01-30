@@ -23,9 +23,26 @@
 #include <QTimer>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QPainter>
 #include <fstream>
 #include <iostream>
 
+
+
+
+
+static QPixmap colorizePixmap(const QString& path, const QColor& color)
+{
+    QPixmap pixmap(path);
+    pixmap = pixmap.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    QPainter painter(&pixmap);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(pixmap.rect(), color);
+    painter.end();
+
+    return pixmap;
+}
 
 
 
@@ -263,9 +280,9 @@ void MainWindow::onContextMenuRequested(const QPoint &pos)
 
             string path = m_core.GetState().GetCurrentFiles()[coreIndex].GetPath().string();
             
-            // string path = m_core.GetState().GetCurrentFiles()[index.row()].GetPath().string();
+            QIcon currentIcon = index.data(Qt::DecorationRole).value<QIcon>();
 
-            showPropertiesDialog(path);
+            showPropertiesDialog(path, currentIcon);
         });
     } 
     else { //Окно при нажатии на пустое место
@@ -450,7 +467,7 @@ QString MainWindow::getUserInput(QString defaultText)
 
 
 
-void MainWindow::showPropertiesDialog(const std::string& path)
+void MainWindow::showPropertiesDialog(const std::string& path, const QIcon& icon)
 {
     FileProperties props = m_core.GetProperties(path);
 
@@ -504,14 +521,33 @@ void MainWindow::showPropertiesDialog(const std::string& path)
     QVBoxLayout* infoLayout = new QVBoxLayout();
     infoLayout->setAlignment(Qt::AlignCenter);
 
-    // большаяконка
+    // ИКОНКИ
+    // QLabel* iconLabel = new QLabel();
+
+    // QString iconPath = FileListModel::getIconPath(props.name, props.isDirectory);
+
+    // iconLabel->setPixmap(QIcon(iconPath).pixmap(64, 64));
+    // iconLabel->setAlignment(Qt::AlignCenter);
+    // iconLabel->setFixedSize(64, 64); //  размер лейбла = размер картинки
+
     QLabel* iconLabel = new QLabel();
+    
+    QPixmap finalPixmap;
 
-    QString iconPath = FileListModel::getIconPath(props.name, props.isDirectory);
+    if (!icon.isNull()) {
+        finalPixmap = icon.pixmap(256, 256).scaled(128, 128, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    } 
+    else {
+        QString iconPath = FileListModel::getIconPath(props.name, props.isDirectory);
+        finalPixmap = colorizePixmap(iconPath, isSystemThemeDark() ? Qt::white : Qt::black);
+        finalPixmap = finalPixmap.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
 
-    iconLabel->setPixmap(QIcon(iconPath).pixmap(64, 64));
+    iconLabel->setPixmap(finalPixmap);
     iconLabel->setAlignment(Qt::AlignCenter);
-    iconLabel->setFixedSize(64, 64); //  размер лейбла = размер картинки
+    
+    iconLabel->setMinimumSize(64, 64);
+
 
     // Имя
     QLabel* nameLabel = new QLabel(QString::fromStdString(props.name));
@@ -668,8 +704,6 @@ void MainWindow::changeEvent(QEvent *event)
             updateIcons();
             
             if (m_model) {
-                m_model->setupIcons();
-
                 if(m_model != nullptr)
                 {
                     m_model->setupIcons();

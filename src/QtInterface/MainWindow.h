@@ -138,8 +138,10 @@ private:
         /// @param pos позиция где создавать
         void onContextMenuRequested(const QPoint &pos);
 
-        
-        void showPropertiesDialog(const std::string& path);
+        /// @brief показывает диалог свойств
+        /// @param path путь к файлу
+        /// @param icon иконка которая будет показана в свойствах
+        void showPropertiesDialog(const std::string& path, const QIcon& icon = QIcon());
 
 
 
