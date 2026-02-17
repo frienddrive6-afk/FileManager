@@ -25,6 +25,8 @@ MainWindow::MainWindow(AppCore& core,QWidget* parent) :
     setUI();
     setupActions();
 
+    loadUiSettings();
+
     connect(m_backBtn, &QPushButton::clicked, this, &MainWindow::onBackClicked);
     connect(m_forwardBtn, &QPushButton::clicked, this, &MainWindow::onForwardClicked);
 

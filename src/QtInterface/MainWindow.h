@@ -79,7 +79,9 @@ private:
     QAction* m_secectAll;
 
     bool m_showHiddenFiles;
+
     int m_currentIconSize;
+    int m_currentSpacing;
     
     bool m_isDark;
 
@@ -105,9 +107,23 @@ private:
 
     /// @brief изменяет размер иконок
     /// @param delta прибавление или отнимание 
-    void changeIconSize(int delta);
+    // void changeIconSize(int delta);
 
+    /// @brief получает индекс в core по индексу в ui
     int getCoreIndex(int uiIndex);
+
+    /**
+     * @brief Обновляет геометрию сетки файлов (размер иконок, отступы, шрифт)
+     * @param size Абсолютный размер иконки в пикселях
+     * @param spacing Расстояние между элементами сетки
+     */
+    void updateLayoutSettings(int size, int spacing);
+
+    /// @brief Сохраняет настройки интерфейса (размер, отступы) в INI файл
+    void saveUiSettings();
+
+    /// @brief Загружает настройки интерфейса из INI файла и применяет их
+    void loadUiSettings();
 
     
 

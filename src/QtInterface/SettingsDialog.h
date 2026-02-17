@@ -11,6 +11,9 @@ class QTableWidget;
 
 
 /// @brief класс диалога настроек
+/// @param m_core ядро приложения
+/// @param currentSize текущий размер иконок
+/// @param currentSpacing текущий отступ
 /// @param m_tabsList левая панель
 /// @param m_pagesStack правая панель
 /// @param m_extInput ввод расширения
@@ -22,10 +25,19 @@ class SettingsDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit SettingsDialog(AppCore& core,QWidget *parent = nullptr);
+    /**
+     * @brief Конструктор диалога настроек.
+     * @param core Ссылка на ядро приложения.
+     * @param currentSize Текущий размер иконок для установки ползунка.
+     * @param currentSpacing Текущий отступ для установки ползунка.
+     */
+    explicit SettingsDialog(AppCore& core, int currentSize, int currentSpacing, QWidget *parent = nullptr);
 
 private:
     AppCore& m_core;
+
+    int m_initialSize;    
+    int m_initialSpacing;
 
     QListWidget* m_tabsList;      
     QStackedWidget* m_pagesStack; 
@@ -46,11 +58,18 @@ private:
     // Метод для создания страницы "Основные/Темы"
     QWidget* createGeneralPage();
 
+    QWidget* createSizePage();
+
 
     void refreshRulesTable();
 
 
     private slots:
         void onAddClicked();        //кнопка добавить
+
+
+    signals:
+        /// @brief Сигнал испускаемый при любом движении ползунков
+        void iconConfigChanged(int size, int spacing);
 
 };

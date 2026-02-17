@@ -134,12 +134,13 @@ void MainWindow::setUI()
     zoomLayout->addWidget(btnPlus);
 
     connect(btnMinus, &QPushButton::clicked, this, [this](){
-        changeIconSize(-20);
-
+        // вычитаем 20 из текущего размера 
+        updateLayoutSettings(m_currentIconSize - 20, m_currentSpacing);
     });
 
     connect(btnPlus, &QPushButton::clicked, this, [this](){
-        changeIconSize(20);
+        // Прибавляем 20 к текущему размеру
+        updateLayoutSettings(m_currentIconSize + 20, m_currentSpacing);
     });
 
     QWidgetAction* zoomAction = new QWidgetAction(settingsMenu);
@@ -154,10 +155,21 @@ void MainWindow::setUI()
     settingsMenu->addAction(settingsAction);
 
     connect(settingsAction, &QAction::triggered, this, [this](){
-        
-        SettingsDialog dlg(m_core, this);
-        dlg.exec();
+        // чтобы окно не удалилось при выходе из функции
+        SettingsDialog* dlg = new SettingsDialog(m_core, m_currentIconSize, m_currentSpacing, this);
 
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+
+        // Убираем модальность (теперь оно не блокирует MainWindow)
+        dlg->setModal(false);
+
+        connect(dlg, &SettingsDialog::iconConfigChanged, this, &MainWindow::updateLayoutSettings);
+
+        connect(dlg, &SettingsDialog::iconConfigChanged, this, [this](){
+            this->saveUiSettings();
+        });
+
+        dlg->show(); // Вместо exec()
     });
 
     //панель опций КОНЕЦ      ==========================================================
@@ -254,7 +266,7 @@ void MainWindow::setUI()
     m_fileView->setFrameShape(QFrame::NoFrame);
     m_fileView->setViewMode(QListView::IconMode);
     m_fileView->setResizeMode(QListView::Adjust);
-    m_fileView->setGridSize(QSize(100, 100));
+    // m_fileView->setGridSize(QSize(100, 100));
     m_fileView->setWordWrap(true);
     m_fileView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_fileView->setContextMenuPolicy(Qt::CustomContextMenu);                    //позволяет вызывать контекстное меню по правой клавише мыши

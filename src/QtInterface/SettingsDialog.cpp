@@ -11,9 +11,11 @@
 #include <QTableWidget>
 #include <QHeaderView>
 
-SettingsDialog::SettingsDialog(AppCore& core, QWidget *parent) : 
+SettingsDialog::SettingsDialog(AppCore& core, int currentSize, int currentSpacing, QWidget *parent) : 
     QDialog(parent),
-    m_core(core)
+    m_core(core),
+    m_initialSize(currentSize),
+    m_initialSpacing(currentSpacing)
 {
     setupUI();
 
@@ -40,12 +42,14 @@ void SettingsDialog::setupUI()
     m_tabsList->setFixedWidth(150); 
     m_tabsList->addItem("Общие");
     m_tabsList->addItem("Типы файлов"); 
+    m_tabsList->addItem("Рамеры");
     
     // --- ПРАВАЯ ПАНЕЛЬ ---
     m_pagesStack = new QStackedWidget(this);
     
     m_pagesStack->addWidget(createGeneralPage());      // Индекс 0
     m_pagesStack->addWidget(createAssociationsPage()); // Индекс 1
+    m_pagesStack->addWidget(createSizePage());         // Индекс 2
 
     mainLayout->addWidget(m_tabsList);
     mainLayout->addWidget(m_pagesStack);
@@ -185,5 +189,41 @@ QWidget* SettingsDialog::createAssociationsPage()
     
     layout->addWidget(m_rulesTable);
 
+    return page;
+}
+
+
+
+
+QWidget* SettingsDialog::createSizePage() {
+    QWidget* page = new QWidget();
+    QVBoxLayout* layout = new QVBoxLayout(page);
+    layout->setSpacing(20); 
+
+    // Блок размера иконок
+    layout->addWidget(new QLabel("Размер иконок:"));
+    QSlider* s_size = new QSlider(Qt::Horizontal);
+    s_size->setRange(48, 256);
+    s_size->setValue(m_initialSize);
+    layout->addWidget(s_size);
+
+    // Блок отступов
+    layout->addWidget(new QLabel("Отступы между иконками:"));
+    QSlider* s_spacing = new QSlider(Qt::Horizontal);
+    s_spacing->setRange(0, 50);
+    s_spacing->setValue(m_initialSpacing);
+    layout->addWidget(s_spacing);
+
+    auto emitChange = [this, s_size, s_spacing]() {
+        #ifdef LOG_APP_CORE
+        qDebug() << "[Settings] Слайдер переменен. Новые значения -> Size:" << s_size->value() << "Spacing:" << s_spacing->value();
+        #endif
+        emit iconConfigChanged(s_size->value(), s_spacing->value());
+    };
+
+    connect(s_size, &QSlider::valueChanged, emitChange);
+    connect(s_spacing, &QSlider::valueChanged, emitChange);
+
+    layout->addStretch();
     return page;
 }

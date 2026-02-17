@@ -54,10 +54,10 @@ void OpenWithDialog::setupUI()
         "    color: white;"
         "}"
         "QListWidget::item:selected:hover {"
-        "    background-color: #ffb773;" /* Чуть светлее оранжевый */
+        "    background-color: #ffb773;" 
         "}"
         "QPushButton { padding: 8px 15px; border-radius: 5px; font-weight: bold; }"
-        "QPushButton#OpenBtn { background-color: #ff9f43; color: white; border: none; }" /* Оранжевая кнопка */
+        "QPushButton#OpenBtn { background-color: #ff9f43; color: white; border: none; }" 
         "QPushButton#OpenBtn:disabled { background-color: #cccccc; }"
         "QPushButton#OpenBtn:hover { background-color: #ffb773; }"
         "QPushButton#CancelBtn { background-color: white; border: 1px solid #ccc; color: #333; }"

@@ -24,6 +24,8 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QPainter>
+#include <QSettings>
+#include <QDir>
 #include <fstream>
 #include <iostream>
 
@@ -602,43 +604,43 @@ void MainWindow::showPropertiesDialog(const std::string& path, const QIcon& icon
 }
 
 
-void MainWindow::changeIconSize(int size)
-{
-    int newSize = m_currentIconSize + size;
+// void MainWindow::changeIconSize(int size)
+// {
+//     int newSize = m_currentIconSize + size;
 
-    if(newSize < 80)
-    {
-        newSize = 80;
-    }
-    if(newSize > 200)
-    {
-        newSize = 200;
-    }
+//     if(newSize < 80)
+//     {
+//         newSize = 80;
+//     }
+//     if(newSize > 200)
+//     {
+//         newSize = 200;
+//     }
 
-    if(newSize != m_currentIconSize)
-    {
-        m_currentIconSize = newSize;
+//     if(newSize != m_currentIconSize)
+//     {
+//         m_currentIconSize = newSize;
 
-        #ifdef LOG_ENABLED
-        cout << "Изменение размера иконок: " << m_currentIconSize << endl;
-        #endif
+//         #ifdef LOG_ENABLED
+//         cout << "Изменение размера иконок: " << m_currentIconSize << endl;
+//         #endif
 
-        m_fileView->setGridSize(QSize(m_currentIconSize, m_currentIconSize));
+//         m_fileView->setGridSize(QSize(m_currentIconSize, m_currentIconSize));
 
-        m_fileView->setIconSize(QSize(m_currentIconSize - 20, m_currentIconSize - 40));
+//         m_fileView->setIconSize(QSize(m_currentIconSize - 20, m_currentIconSize - 40));
 
-        QFont font = m_fileView->font();
+//         QFont font = m_fileView->font();
         
-        int fontSize = 9 + (m_currentIconSize - 50) / 20;
+//         int fontSize = 9 + (m_currentIconSize - 50) / 20;
 
-        if (fontSize > 16) fontSize = 16; 
+//         if (fontSize > 16) fontSize = 16; 
 
-        font.setPointSize(fontSize);
-        m_fileView->setFont(font);
+//         font.setPointSize(fontSize);
+//         m_fileView->setFont(font);
 
-    }
+//     }
 
-}
+// }
 
 int MainWindow::getCoreIndex(int uiIndex)
 {
@@ -693,4 +695,71 @@ void MainWindow::changeEvent(QEvent *event)
             }
         }
     }
+}
+
+
+
+
+
+void MainWindow::updateLayoutSettings(int size, int spacing)
+{
+    m_currentIconSize = qBound(48, size, 256);
+    m_currentSpacing = qBound(0, spacing, 50);
+
+    m_fileView->setIconSize(QSize(m_currentIconSize, m_currentIconSize));
+    m_fileView->setSpacing(m_currentSpacing);
+
+    int gridWidth = m_currentIconSize + (m_currentSpacing * 2);
+    int gridHeight = m_currentIconSize + 60 + (m_currentSpacing * 2);
+
+    m_fileView->setGridSize(QSize(gridWidth, gridHeight));
+
+    int fontSize = qBound(9, m_currentIconSize / 10, 14);
+    QFont font = m_fileView->font();
+    font.setPointSize(fontSize);
+    m_fileView->setFont(font);
+
+    #ifdef LOG_APP_CORE
+    qDebug() << "[GUI] Layout updated: Size =" << m_currentIconSize << "Spacing =" << m_currentSpacing;
+    #endif
+    
+    m_fileView->doItemsLayout(); 
+}
+
+
+
+
+void MainWindow::saveUiSettings()
+{
+    QString path = QDir::homePath() + "/.config/filemanagerOnQt/";
+    QDir().mkpath(path); // папка точно существует
+
+    QSettings settings(path + "settings.ini", QSettings::IniFormat);
+    
+    settings.beginGroup("Appearance");
+    settings.setValue("iconSize", m_currentIconSize);
+    settings.setValue("spacing", m_currentSpacing);
+    settings.endGroup();
+
+    settings.sync(); // Принудительно сохраняем на диск
+    
+    #ifdef LOG_APP_CORE
+    qDebug() << "[GUI] настройки сохранены на диск";
+    #endif
+}
+
+
+void MainWindow::loadUiSettings()
+{
+    QSettings settings(QDir::homePath() + "/.config/filemanagerOnQt/settings.ini", QSettings::IniFormat);
+    settings.beginGroup("Appearance");
+    int size = settings.value("iconSize", 100).toInt(); // 100 - дефолт
+    int spacing = settings.value("spacing", 10).toInt();
+    settings.endGroup();
+
+    #ifdef LOG_APP_CORE
+    qDebug() << "[GUI] Настройки загружены. Приминено: Size =" << size << "Spacing =" << spacing;
+    #endif
+
+    updateLayoutSettings(size, spacing);
 }
